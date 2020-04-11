@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 
 #include "server.h"
+#include "session.h"
 
 using boost::asio::ip::tcp;
 

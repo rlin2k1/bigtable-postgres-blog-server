@@ -1,9 +1,5 @@
 #include <boost/asio.hpp>
 
-// Added to prevent redefinition of class
-// Can modify to ifndef/define/endif syntax if desired
-#pragma once
-
 class session {
 	public:
 		session(boost::asio::io_service& io_service);

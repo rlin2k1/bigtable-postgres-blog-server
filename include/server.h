@@ -1,10 +1,6 @@
 #include <boost/asio.hpp>
 
-#include "session.h"
-
-// Added to prevent redefinition of class
-// Can modify to ifndef/define/endif syntax if desired
-#pragma once
+class session;
 
 using boost::asio::ip::tcp;
 
