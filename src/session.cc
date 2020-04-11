@@ -23,8 +23,13 @@ void session::start() {
 
 void session::handle_read(const boost::system::error_code& error, size_t bytes_transferred) {
 	if (!error) {
+		// Asynchronously writes to the socket_ everything in the buffer. 
+		std::string resp = "HTTP/1.1 200 OK/\r\nContent-Length: " + std::to_string(bytes_transferred) + "\r\nContent-Type: text/plain\r\n\r\n";
+
+		int buffer_length = resp.length() + bytes_transferred;
+
 		boost::asio::async_write(socket_,
-			boost::asio::buffer(data_, bytes_transferred),
+			boost::asio::buffer(resp + data_, buffer_length),
 			boost::bind(&session::handle_write, this,
 			boost::asio::placeholders::error));
 	} else {
