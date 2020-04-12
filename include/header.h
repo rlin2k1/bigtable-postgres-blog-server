@@ -24,6 +24,11 @@ struct header
   std::string value;
 };
 
+inline bool operator==(const header& lhs, const header& rhs)
+{
+    return (lhs.name == rhs.name) && (lhs.value == rhs.value);
+}
+
 } // namespace server
 } // namespace http
 

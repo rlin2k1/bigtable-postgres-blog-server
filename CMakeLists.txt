@@ -48,13 +48,13 @@ target_link_libraries(server session_server_lib  Boost::system)
 add_executable(config_parser_test tests/config_parser_test.cc)
 target_link_libraries(config_parser_test session_server_lib gtest_main)
 
-add_executable(request_parser_test tests/request_parser_test.cc)
-target_link_libraries(request_parser_test session_server_lib gtest_main)
+add_executable(request_handler_test tests/request_handler_test.cc)
+target_link_libraries(request_handler_test Boost::system session_server_lib gtest_main)
 
 # TODO(kubilayagi): Update with test binary
 # gtest_discover_tests(example_lib_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-gtest_discover_tests(request_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # TODO(kubilayagi): Update with target/test targets
 # include(cmake/CodeCoverageReportConfig.cmake)
