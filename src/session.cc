@@ -14,10 +14,15 @@ tcp::socket& session::socket() {
 }
 
 void session::start() {
+	// Asynchronously reads data FROM the stream socket TO the buffer
 	socket_.async_read_some(boost::asio::buffer(data_, max_length),
 							boost::bind(&session::handle_read, this,
 							boost::asio::placeholders::error,
 							boost::asio::placeholders::bytes_transferred));
+	// After the read operation completes, we call boosts::binds() -> Read() Function
+	/* session::handle_read and session::handle_write
+	   go back and forth calling each other!
+	*/
 }
 
 
@@ -29,21 +34,15 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
               request_, data_, data_ + bytes_transferred);
 
 		if (result == http::server::request_parser::good) {
-			std::string resp = "HTTP/1.1 200 OK/\r\nContent-Length: " + std::to_string(bytes_transferred) + "\r\nContent-Type: text/plain\r\n\r\n";
+			request_handler_.handle_request(request_, reply_, data_);
 
-			int buffer_length = resp.length() + bytes_transferred;
-
-            boost::asio::async_write(socket_,
-				boost::asio::buffer(resp + data_, buffer_length),
+            boost::asio::async_write(socket_, reply_.to_buffers(),
 				boost::bind(&session::handle_write, this,
 				boost::asio::placeholders::error));
         } else if (result == http::server::request_parser::bad) {
-			std::string resp = "HTTP/1.1 400 Bad Request\r\n";
+			reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
 
-			int buffer_length = resp.length();
-
-            boost::asio::async_write(socket_,
-				boost::asio::buffer(resp, buffer_length),
+            boost::asio::async_write(socket_, reply_.to_buffers(),
 				boost::bind(&session::shutdown, this,
 				boost::asio::placeholders::error));
         } else { // Keep on Reading
@@ -60,10 +59,12 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
 
 void session::handle_write(const boost::system::error_code& error) {
 	if (!error) {
+		// Asynchronously reads data FROM the stream socket TO the buffer
 		socket_.async_read_some(boost::asio::buffer(data_, max_length),
 			boost::bind(&session::handle_read, this,
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred));
+		// After the read operation completes, we call boosts::binds() -> Read() Function
 	} else {
 		delete this;
 	}

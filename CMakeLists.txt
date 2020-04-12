@@ -35,7 +35,7 @@ message(STATUS "Boost version: ${Boost_VERSION}")
 include_directories(include)
 
 # TODO(kubilayagi): Update name and srcs - ** we'll need to update these after refactoring
-add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParser.cc src/NginxConfigStatement.cc src/NginxConfig.cc src/request_parser.cc)
+add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParser.cc src/NginxConfigStatement.cc src/NginxConfig.cc src/request_parser.cc src/reply.cc src/request_handler.cc)
 
 
 # TODO(kubilayagi): Update executable name, srcs, and deps

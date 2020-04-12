@@ -2,6 +2,8 @@
 
 #include "request.h"
 #include "request_parser.h"
+#include "request_handler.h"
+#include "reply.h"
 
 class session {
 	public:
@@ -21,4 +23,8 @@ class session {
   		http::server::request request_;
   		// The parser for the incoming request.
   		http::server::request_parser request_parser_;
+		// The handler used to process the incoming request.
+  		http::server::request_handler request_handler_;
+  		// The reply to be sent back to the client.
+  		http::server::reply reply_;
 };

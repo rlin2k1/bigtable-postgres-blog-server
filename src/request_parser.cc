@@ -8,8 +8,10 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "request_parser.h"
+// Library Source taken from https://www.boost.org/doc/libs/1_65_1/doc/html/boost_asio/example/cpp11/http/server/request_parser.cpp
+
 #include "request.h"
+#include "request_parser.h"
 
 namespace http {
 namespace server {
