@@ -15,9 +15,10 @@ class session {
 		void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
 		void handle_write(const boost::system::error_code& error);
 		void shutdown(const boost::system::error_code& error);
+		std::string get_entire_request();
 		boost::asio::ip::tcp::socket socket_;
 		enum { max_length = 1024 };
-		char data_[max_length];
+		char data_[max_length+1];
 
 		// The incoming request.
   		http::server::request request_;
