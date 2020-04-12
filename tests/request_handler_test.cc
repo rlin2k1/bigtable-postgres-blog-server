@@ -24,13 +24,6 @@ TEST_F(RequestHandlerTest, GETRequest) {
     char data[] = "GET /index.html HTTP/1.1\r\n\r\n\r\n";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
-    EXPECT_EQ(result, http::server::request_parser::good);
-
-    EXPECT_EQ(request_.method, "GET");
-    EXPECT_EQ(request_.uri, "/index.html");
-    EXPECT_EQ(request_.http_version_major, 1);
-    EXPECT_EQ(request_.http_version_minor, 1);
-    EXPECT_TRUE(request_.headers.empty());
 
     request_handler_.handle_request(request_, reply_, data);
     EXPECT_EQ(reply_.status, http::server::reply::ok);
@@ -47,7 +40,6 @@ TEST_F(RequestHandlerTest, BadRequest) {
     char data[] = "HTTP REQUEST GET /";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
-    EXPECT_EQ(result, http::server::request_parser::bad);
 
     reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
 
@@ -71,7 +63,6 @@ TEST_F(RequestHandlerTest, EmptyRequest) {
     char data[] = "";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
-    EXPECT_EQ(result, http::server::request_parser::bad);
 
     reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
 
@@ -94,19 +85,6 @@ TEST_F(RequestHandlerTest, HeaderBodyRequest) {
 User-Agent: nc/0.01\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\nBODY";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
-    EXPECT_EQ(result, http::server::request_parser::good);
-
-    EXPECT_EQ(request_.method, "GET");
-    EXPECT_EQ(request_.uri, "/");
-    EXPECT_EQ(request_.http_version_major, 2);
-    EXPECT_EQ(request_.http_version_minor, 1);
-
-    std::vector<http::server::header> request_header {\
-    http::server::header{"User-Agent", "nc/0.01"}, \
-    http::server::header{"Host", "127.0.0.1"}, \
-    http::server::header{"Accept", "*/*"}};
-
-    EXPECT_EQ(request_.headers, request_header);
 
     request_handler_.handle_request(request_, reply_, data);
     EXPECT_EQ(reply_.status, http::server::reply::ok);
@@ -125,19 +103,6 @@ TEST_F(RequestHandlerTest, EmptyBodyRequest) {
 User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
-    EXPECT_EQ(result, http::server::request_parser::good);
-
-    EXPECT_EQ(request_.method, "GET");
-    EXPECT_EQ(request_.uri, "/test.html");
-    EXPECT_EQ(request_.http_version_major, 3);
-    EXPECT_EQ(request_.http_version_minor, 1);
-
-    std::vector<http::server::header> request_header {\
-    http::server::header{"User-Agent", "Chrome"}, \
-    http::server::header{"Host", "127.0.0.1"}, \
-    http::server::header{"Accept", "*/*"}};
-
-    EXPECT_EQ(request_.headers, request_header);
 
     request_handler_.handle_request(request_, reply_, data);
     EXPECT_EQ(reply_.status, http::server::reply::ok);
@@ -156,18 +121,6 @@ User-Agent: Firefox\r\nHost: 127.1.1.1\r\n\r\n\
 name1=value1&name2=value2";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
-    EXPECT_EQ(result, http::server::request_parser::good);
-
-    EXPECT_EQ(request_.method, "POST");
-    EXPECT_EQ(request_.uri, "/test/test.php");
-    EXPECT_EQ(request_.http_version_major, 1);
-    EXPECT_EQ(request_.http_version_minor, 0);
-
-    std::vector<http::server::header> request_header \
-    {http::server::header{"User-Agent", "Firefox"}, \
-    http::server::header{"Host", "127.1.1.1"}};
-
-    EXPECT_EQ(request_.headers, request_header);
 
     request_handler_.handle_request(request_, reply_, data);
     EXPECT_EQ(reply_.status, http::server::reply::ok);
@@ -179,3 +132,185 @@ name1=value1&name2=value2";
     http::server::header{"Content-Type", "text/plain"}};
     EXPECT_EQ(reply_.headers, reply_header);
 }
+
+TEST_F(RequestHandlerTest, LongPOSTRequest) {
+    char data[] = "POST /test/test.php HTTP/1.0\r\n\
+User-Agent: Firefox\r\nHost: 127.1.1.1\r\n\r\n\
+once upon a time..............................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+the end";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + sizeof(data));
+
+    request_handler_.handle_request(request_, reply_, data);
+    EXPECT_EQ(reply_.status, http::server::reply::ok);
+    EXPECT_EQ(reply_.content, data);
+
+    std::vector<http::server::header> reply_header { \
+    http::server::header{"Content-Length", \
+    std::to_string(reply_.content.size())}, \
+    http::server::header{"Content-Type", "text/plain"}};
+    EXPECT_EQ(reply_.headers, reply_header);
+}
+
+TEST_F(RequestHandlerTest, TrickyLongPOSTRequest) {
+    char data[] = "POST /test/test.php HTTP/1.0\r\n\
+User-Agent: Firefox\r\nHost: 127.1.1.1\r\n\r\n\
+once upon a time..............................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+............\r\n\r\n..........................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+............\r\n\r\n..........................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+............\r\n\r\n..........................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+............\r\t\r\r..........................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+..............................................\
+the end";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + sizeof(data));
+
+    request_handler_.handle_request(request_, reply_, data);
+    EXPECT_EQ(reply_.status, http::server::reply::ok);
+    EXPECT_EQ(reply_.content, data);
+
+    std::vector<http::server::header> reply_header { \
+    http::server::header{"Content-Length", \
+    std::to_string(reply_.content.size())}, \
+    http::server::header{"Content-Type", "text/plain"}};
+    EXPECT_EQ(reply_.headers, reply_header);
+}
+
+TEST_F(RequestHandlerTest, Exactly1024POSTRequest) {
+    char data[] = "POST /test/test.php HTTP/1.0\r\n\
+User-Agent: FirefoxrnHost: 127.1.1.1\r\n\r\n\
+once upon a time.............................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+..the end";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + sizeof(data));
+
+    request_handler_.handle_request(request_, reply_, data);
+    EXPECT_EQ(reply_.status, http::server::reply::ok);
+    EXPECT_EQ(reply_.content, data);
+
+    std::vector<http::server::header> reply_header { \
+    http::server::header{"Content-Length", \
+    std::to_string(reply_.content.size())}, \
+    http::server::header{"Content-Type", "text/plain"}};
+    EXPECT_EQ(reply_.headers, reply_header);
+}
+
+TEST_F(RequestHandlerTest, Exactly1025POSTRequest) {
+    char data[] = "POST /test/test.php HTTP/1.0\r\n\
+User-Agent: FirefoxrnHost: 127.1.1.1\r\n\r\n\
+once upon a time.............................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+.............................................\
+...the end";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + sizeof(data));
+
+    request_handler_.handle_request(request_, reply_, data);
+    EXPECT_EQ(reply_.status, http::server::reply::ok);
+    EXPECT_EQ(reply_.content, data);
+
+    std::vector<http::server::header> reply_header { \
+    http::server::header{"Content-Length", \
+    std::to_string(reply_.content.size())}, \
+    http::server::header{"Content-Type", "text/plain"}};
+    EXPECT_EQ(reply_.headers, reply_header);
+}
+

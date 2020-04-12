@@ -34,29 +34,24 @@ message(STATUS "Boost version: ${Boost_VERSION}")
 
 include_directories(include)
 
-# TODO(kubilayagi): Update name and srcs - ** we'll need to update these after refactoring
+# Update name and srcs - ** we'll need to update these after refactoring
 add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParser.cc src/NginxConfigStatement.cc src/NginxConfig.cc src/request_parser.cc src/reply.cc src/request_handler.cc)
 
 
-# TODO(kubilayagi): Update executable name, srcs, and deps
+# Update executable name, srcs, and deps
 add_executable(server src/server_main.cc)
-target_link_libraries(server session_server_lib  Boost::system)
+target_link_libraries(server session_server_lib Boost::system)
 
-# TODO(kubilayagi): Update test executable name, srcs, and deps
-# add_executable(example_lib_test tests/example_lib_test.cc)
-# target_link_libraries(example_lib_test example_lib gtest_main)
+# Update test executable name, srcs, and deps
 add_executable(config_parser_test tests/config_parser_test.cc)
 target_link_libraries(config_parser_test session_server_lib gtest_main)
 
-add_executable(request_handler_test tests/request_handler_test.cc)
-target_link_libraries(request_handler_test Boost::system session_server_lib gtest_main)
+add_executable(request_parser_handler_test tests/request_handler_test.cc tests/request_parser_test.cc)
+target_link_libraries(request_parser_handler_test Boost::system session_server_lib gtest_main)
 
-# TODO(kubilayagi): Update with test binary
-# gtest_discover_tests(example_lib_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+# Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-gtest_discover_tests(request_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(request_parser_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
-# TODO(kubilayagi): Update with target/test targets
-# include(cmake/CodeCoverageReportConfig.cmake)
-# generate_coverage_report(TARGETS example_server example_lib TESTS example_lib_test)
+# Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
