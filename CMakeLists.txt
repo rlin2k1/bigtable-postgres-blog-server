@@ -39,8 +39,8 @@ add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParse
 
 
 # Update executable name, srcs, and deps
-add_executable(server src/server_main.cc)
-target_link_libraries(server session_server_lib Boost::system)
+add_executable(webserver src/server_main.cc)
+target_link_libraries(webserver session_server_lib Boost::system)
 
 # Update test executable name, srcs, and deps
 add_executable(config_parser_test tests/config_parser_test.cc)

@@ -17,7 +17,7 @@ RUN ctest --output-on_failure
 FROM ubuntu:latest as deploy
 
 # Copy server output binary to "."
-COPY --from=builder /usr/src/project/build/bin/server .
+COPY --from=builder /usr/src/project/build/bin/webserver .
 # Copy configuration file to "."
 COPY --from=builder /usr/src/project/config .
 
@@ -25,7 +25,7 @@ COPY --from=builder /usr/src/project/config .
 EXPOSE 80
 
 # Use ENTRYPOINT to specify the binary name
-ENTRYPOINT ["./server"]
+ENTRYPOINT ["./webserver"]
 
 # Use CMD to specify arguments to ENTRYPOINT
 CMD ["config"]
