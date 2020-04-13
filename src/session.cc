@@ -7,7 +7,7 @@
 
 using boost::asio::ip::tcp;
 
-session::session(boost::asio::io_service& io_service) : socket_(io_service) {}
+session::session(boost::asio::io_service& io_service) : socket_(io_service), expected_content_length_(0) {}
 
 tcp::socket& session::socket() {
 	return socket_;
@@ -33,25 +33,29 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
 		http::server::request_parser::result_type result;
 		std::tie(result, std::ignore) = request_parser_.parse(
               request_, data_, data_ + bytes_transferred);
-
-		if (result == http::server::request_parser::good) {
-			std::string client_http_message = get_entire_request();
+		// TODO (kubilayagi) Determine whether expanding the max_length can get rid of this
+		if (result == http::server::request_parser::indeterminate) { // Keep on Reading
+            socket_.async_read_some(boost::asio::buffer(data_, max_length), 
+				boost::bind(&session::handle_read, this,
+				boost::asio::placeholders::error,
+				boost::asio::placeholders::bytes_transferred));
+        }
+		bool should_continue = get_entire_request();
+		if (result == http::server::request_parser::good && should_continue) {
+			std::string client_http_message = current_header_ + current_body_;
 			request_handler_.handle_request(request_, reply_, client_http_message.c_str());
 
             boost::asio::async_write(socket_, reply_.to_buffers(),
 				boost::bind(&session::handle_write, this,
 				boost::asio::placeholders::error));
-        } else if (result == http::server::request_parser::bad) {
+			current_body_ = "";
+			current_header_ = "";
+        } else if (result == http::server::request_parser::bad || !should_continue) {
 			reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
 
             boost::asio::async_write(socket_, reply_.to_buffers(),
 				boost::bind(&session::shutdown, this,
 				boost::asio::placeholders::error));
-        } else { // Keep on Reading
-            socket_.async_read_some(boost::asio::buffer(data_, max_length), 
-				boost::bind(&session::handle_read, this,
-				boost::asio::placeholders::error,
-				boost::asio::placeholders::bytes_transferred));
         }
 		// After the write operation completes, we call boosts::binds() -> The Write Function
 	} else {
@@ -82,17 +86,41 @@ void session::shutdown(const boost::system::error_code& error) {
 	}
 }
 
-std::string session::get_entire_request() {
+bool session::get_entire_request() {
+	// Checks the content-length field and makes sure that the body that it gets
+	// the correct amount of data in the body that it expects within a certain
+	// time frame.
 	std::string data_string(data_);
 	int divider_position = data_string.find("\r\n\r\n");
-	std::string header = data_string.substr(0, divider_position);
-	std::string body = data_string.substr(divider_position);
-	// keep reading while there are still bytes unread in the socket
-	while (socket_.available()) {
-		std::vector<char> tempbuf(max_length);
-		socket_.read_some(boost::asio::buffer(tempbuf, max_length));
-		std::string body_addition(tempbuf.begin(), tempbuf.end());
-		body = body + body_addition;
+	std::string header = data_string.substr(0, divider_position+4);
+	std::string body = data_string.substr(divider_position+4);
+	int length_index = header.find("Content-Length: ");
+	std::string content_length_string;
+	if (length_index!=std::string::npos) {
+		for(int i = length_index+16; isdigit(header[i]); i++) {
+			content_length_string = content_length_string + header[i];
+		}
+		if (content_length_string != "") {
+			expected_content_length_ = stoi(content_length_string);
+		}
+			// keep reading while there are still bytes unread in the socket
+		int timeout_counter = 0;
+		while (timeout_counter < max_timeout && body.size() < expected_content_length_) {
+			char tempbuf[max_length+1];
+			memset(tempbuf, '\0', max_length+1);
+			if (socket_.available()) {
+				socket_.read_some(boost::asio::buffer(tempbuf, max_length));
+			} else {
+				timeout_counter++;
+				continue;
+			}
+			std::string body_addition(tempbuf);
+			timeout_counter = 0;
+			body = body + body_addition;
+		}
+		current_body_ = body;
+		current_header_ = header;
 	}
-	return header + body;
+
+	return body.size() == expected_content_length_;
 }
