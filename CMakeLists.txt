@@ -55,3 +55,5 @@ gtest_discover_tests(request_parser_handler_test WORKING_DIRECTORY ${CMAKE_CURRE
 
 # Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
+
+generate_coverage_report(TARGETS webserver session_server_lib TESTS config_parser_test request_parser_handler_test)
