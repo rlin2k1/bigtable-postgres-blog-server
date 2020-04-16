@@ -29,13 +29,13 @@ void session::start() {
 
 void session::handle_read(const boost::system::error_code& error, size_t bytes_transferred) {
 	if (!error) {
-		// Asynchronously writes to the socket_ everything in the buffer. 
+		// Asynchronously writes to the socket_ everything in the buffer.
 		http::server::request_parser::result_type result;
 		std::tie(result, std::ignore) = request_parser_.parse(
               request_, data_, data_ + bytes_transferred);
 
 		if (result == http::server::request_parser::good) {
-			std::string client_http_message = get_entire_request();
+			std::string client_http_message(request_.fullmessage.begin(), request_.fullmessage.end());
 			request_handler_.handle_request(request_, reply_, client_http_message.c_str());
 
             boost::asio::async_write(socket_, reply_.to_buffers(),
@@ -48,7 +48,8 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
 				boost::bind(&session::shutdown, this,
 				boost::asio::placeholders::error));
         } else { // Keep on Reading
-            socket_.async_read_some(boost::asio::buffer(data_, max_length), 
+			memset(data_, '\0', max_length+1);
+            socket_.async_read_some(boost::asio::buffer(data_, max_length),
 				boost::bind(&session::handle_read, this,
 				boost::asio::placeholders::error,
 				boost::asio::placeholders::bytes_transferred));
@@ -80,19 +81,4 @@ void session::shutdown(const boost::system::error_code& error) {
 	} else {
 		delete this;
 	}
-}
-
-std::string session::get_entire_request() {
-	std::string data_string(data_);
-	int divider_position = data_string.find("\r\n\r\n");
-	std::string header = data_string.substr(0, divider_position);
-	std::string body = data_string.substr(divider_position);
-	// keep reading while there are still bytes unread in the socket
-	while (socket_.available()) {
-		std::vector<char> tempbuf(max_length);
-		socket_.read_some(boost::asio::buffer(tempbuf, max_length));
-		std::string body_addition(tempbuf.begin(), tempbuf.end());
-		body = body + body_addition;
-	}
-	return header + body;
 }

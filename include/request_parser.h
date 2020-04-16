@@ -44,8 +44,14 @@ public:
     while (begin != end)
     {
       result_type result = consume(req, *begin++);
-      if (result == good || result == bad)
-        return std::make_tuple(result, begin);
+      // TODO(Kubilay Agi): Doesn't handle the case where a client sends multiple consecutive packets
+      if ((result == good && (begin == end)) || result == bad) {
+          return std::make_tuple(result, begin);
+      } else if ((result == good && (begin != end))) {
+        // Request header is good, but unexpected input after request,
+        // then signal bad request
+          return std::make_tuple(bad, begin);
+      }
     }
     return std::make_tuple(indeterminate, begin);
   }
@@ -88,8 +94,11 @@ private:
     space_before_header_value,
     header_value,
     expecting_newline_2,
-    expecting_newline_3
+    expecting_newline_3,
+    expecting_body,
   } state_;
+
+  int contentsize_;
 };
 
 } // namespace server

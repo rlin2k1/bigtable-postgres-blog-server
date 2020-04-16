@@ -8,8 +8,11 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-// Library Source taken from https://www.boost.org/doc/libs/1_65_1/doc/html/boost_asio/example/cpp11/http/server/request_parser.cpp
+// Library Sources taken from:
+// https://www.boost.org/doc/libs/1_65_1/doc/html/boost_asio/example/cpp11/http/server/request_parser.cpp
+// https://github.com/nekipelov/httpparser
 
+#include <strings.h>
 #include "request.h"
 #include "request_parser.h"
 
@@ -17,7 +20,7 @@ namespace http {
 namespace server {
 
 request_parser::request_parser()
-  : state_(method_start)
+  : state_(method_start), contentsize_(0)
 {
 }
 
@@ -28,6 +31,7 @@ void request_parser::reset()
 
 request_parser::result_type request_parser::consume(request& req, char input)
 {
+  req.fullmessage.push_back(input);
   switch (state_)
   {
   case method_start:
@@ -255,6 +259,16 @@ request_parser::result_type request_parser::consume(request& req, char input)
   case header_value:
     if (input == '\r')
     {
+      std::string current_header = req.headers.back().name;
+      if (strcasecmp(current_header.c_str(), "Content-Length") == 0) {
+        try {
+          req.bodysize = std::stoi(req.headers.back().value);
+          contentsize_ = std::stoi(req.headers.back().value);
+          req.body.reserve(req.bodysize);
+        } catch (std::exception e) {
+          return bad;
+        }
+      }
       state_ = expecting_newline_2;
       return indeterminate;
     }
@@ -278,7 +292,21 @@ request_parser::result_type request_parser::consume(request& req, char input)
       return bad;
     }
   case expecting_newline_3:
-    return (input == '\n') ? good : bad;
+    if (contentsize_ == 0) {
+      return (input == '\n') ? good : bad;
+    } else {
+      state_ = expecting_body;
+      return indeterminate;
+    }
+  case expecting_body:
+    --contentsize_;
+    req.body.push_back(input);
+    if (contentsize_ == 0) {
+      return good;
+    } else {
+      return indeterminate;
+    }
+
   default:
     return bad;
   }

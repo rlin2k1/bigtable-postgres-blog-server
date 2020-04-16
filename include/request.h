@@ -28,6 +28,9 @@ struct request
   int http_version_major;
   int http_version_minor;
   std::vector<header> headers;
+  int bodysize;
+  std::vector<char> body;
+  std::vector<char> fullmessage;
 };
 
 } // namespace server
