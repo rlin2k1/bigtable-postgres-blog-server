@@ -59,6 +59,8 @@ boost::asio::const_buffer to_buffer(reply::status_type status)
     return boost::asio::buffer(ok);
   case reply::bad_request:
     return boost::asio::buffer(bad_request);
+  default:
+    return boost::asio::buffer(bad_request);
   }
 }
 
@@ -172,6 +174,8 @@ std::string to_string(reply::status_type status)
   switch (status)
   {
   case reply::bad_request:
+    return bad_request;
+  default:
     return bad_request;
   }
 }
