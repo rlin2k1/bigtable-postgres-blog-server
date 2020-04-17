@@ -270,8 +270,6 @@ en-US,en;q=0.9\r\n\r\n";
     EXPECT_EQ(request_.headers, request_header);
 }
 
-
-
 TEST_F(RequestParserTest, GETRequestNoNewLine2) {
     char data[] = "GET /test.html HTTP/3.1\r\n\
 User-Agent: Chrome\rHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
@@ -304,5 +302,253 @@ User-Agent: '\a'Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
     EXPECT_EQ(result, http::server::request_parser::bad);
 }
 
+TEST_F(RequestParserTest, GETRequestBadHeaderName) {
+    char data[] = "GET /test.html HTTP/1.1\r\n\
+User-AgentÇ Chrome\r\nHost: 127.0.0.1\r\n\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
 
+TEST_F(RequestParserTest, GETRequestBadHeaderName2) {
+    char data[] = "GET /test.html HTTP/1.1\r\n\
+User-Agent\t Chrome\r\nHost: 127.0.0.1\r\n\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
 
+TEST_F(RequestParserTest, GETRequestBadHeaderName3) {
+    char data[] = "GET /test.html HTTP/1.1\r\n\
+User-Agent^ Chrome\r\nHost: 127.0.0.1\r\n\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETHTTPVersionMajorTwoDigits) {
+    char data[] = "GET /test.html HTTP/13.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::good);
+
+    EXPECT_EQ(request_.method, "GET");
+    EXPECT_EQ(request_.uri, "/test.html");
+    EXPECT_EQ(request_.http_version_major, 13);
+    EXPECT_EQ(request_.http_version_minor, 1);
+
+    std::vector<http::server::header> request_header {
+        http::server::header{"User-Agent", "Chrome"},
+        http::server::header{"Host", "127.0.0.1"},
+        http::server::header{"Accept", "*/*"}
+    };
+
+    EXPECT_EQ(request_.headers, request_header);
+}
+
+TEST_F(RequestParserTest, GETHTTPVersionMinorTwoDigits) {
+    char data[] = "GET /test.html HTTP/3.12\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::good);
+
+    EXPECT_EQ(request_.method, "GET");
+    EXPECT_EQ(request_.uri, "/test.html");
+    EXPECT_EQ(request_.http_version_major, 3);
+    EXPECT_EQ(request_.http_version_minor, 12);
+
+    std::vector<http::server::header> request_header {
+        http::server::header{"User-Agent", "Chrome"},
+        http::server::header{"Host", "127.0.0.1"},
+        http::server::header{"Accept", "*/*"}
+    };
+
+    EXPECT_EQ(request_.headers, request_header);
+}
+
+TEST_F(RequestParserTest, GETHTTPVersionMinorLetterInsteadOfNum) {
+    char data[] = "GET /test.html HTTP/3.a\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETBadHeaderLineStartExtraSpace) {
+    char data[] = "GET /test.html HTTP/3.1 \n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETBadHeaderExpectingNewLine) {
+    char data[] = "GET /test.html HTTP/3.1\r\r\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETBadRequestHeaderSpecialCharAtLineStart) {
+    char data[] = "GET /test.html HTTP/3.1\r\n\
+ : Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestBadMinorVersion) {
+    char data[] = "GET /test.html HTTP/3. \r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestBadMajorVersionStart) {
+    char data[] = "GET /test.html HTTP/Ç.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestBadMajorVersionEnd) {
+    char data[] = "GET /test.html HTTP/3Ç.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestCtlAsURI) {
+    char data[] = "GET /\v HTTP/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestBadMethodName) {
+    char data[] = "GÇT /test.html HTTP/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestBadMethodName2) {
+    char data[] = "G@T /test.html HTTP/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestBadMethodName3) {
+    char data[] = "G\tT /test.html HTTP/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestHTTPBad1stT) {
+    char data[] = "GET /test.html HÇTP/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestHTTPBad2ndT) {
+    char data[] = "GET /test.html HTÇP/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestHTTPBadP) {
+    char data[] = "GET /test.html HTTÇ/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestHTTPNoVersionSlash) {
+    char data[] = "GET /test.html HTTP3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, RequestParserReset) {
+    char data[] = "GET /test.html HTTP/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    // TODO/HELP: simply called reset function for branch coverage,
+    // wasn't sure how to check expected output after resetting
+    // request_parser.
+    request_parser_.reset();
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::good);
+
+    EXPECT_EQ(request_.method, "GET");
+    EXPECT_EQ(request_.uri, "/test.html");
+    EXPECT_EQ(request_.http_version_major, 3);
+    EXPECT_EQ(request_.http_version_minor, 1);
+
+    std::vector<http::server::header> request_header {
+        http::server::header{"User-Agent", "Chrome"},
+        http::server::header{"Host", "127.0.0.1"},
+        http::server::header{"Accept", "*/*"}
+    };
+
+    EXPECT_EQ(request_.headers, request_header);
+}
+
+TEST_F(RequestParserTest, GETBadHeaderLineStartSpecial) {
+    char data[] = "GET /test.html HTTP/3.1\r\n\
+\tUser-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETBadHeaderLineStartNotChar) {
+    char data[] = "GET /test.html HTTP/3.1\r\n\
+ÇUser-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETMethodStartNotChar) {
+    char data[] = "ÇET /test.html HTTP/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, HeaderLWS1) {
+    char data[] = "GET /test.html HTTP/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\n\t\rAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, HeaderLWS4) {
+    char data[] = "GET /test.html HTTP/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\n\t\vAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
