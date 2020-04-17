@@ -47,6 +47,12 @@ TEST_F(NginxConfigParserTest, NegativePortNumberConfig) {
     EXPECT_TRUE(got_default_bad_port_number);
 }
 
+TEST_F(NginxConfigParserTest, IPPortNumberConfig) {
+    bool parsed_correctly = parser.Parse("ip_port_config", &out_config);
+    bool success = parsed_correctly && out_config.port_number == CORRECT_PORT;
+    EXPECT_TRUE(success);
+}
+
 TEST_F(NginxConfigParserTest, DNEFileConfig) {
   bool failure = parser.Parse("DNE_config", &out_config);
 
@@ -79,6 +85,48 @@ TEST_F(NginxConfigParserTest, UnmatchedBracketsConfig) {
 
 TEST_F(NginxConfigParserTest, EmptyConfig) {
   bool success = parser.Parse("empty_config", &out_config);
+
+  EXPECT_TRUE(success);
+}
+
+TEST_F(NginxConfigParserTest, CommentsConfig) {
+  bool success = parser.Parse("comments_config", &out_config);
+
+  EXPECT_TRUE(success);
+}
+
+TEST_F(NginxConfigParserTest, EmptyBracesConfig) {
+  bool success = parser.Parse("empty_braces_config", &out_config);
+
+  EXPECT_TRUE(success);
+}
+
+TEST_F(NginxConfigParserTest, BadEndConfig) {
+  bool failure = parser.Parse("bad_end_config", &out_config);
+
+  EXPECT_FALSE(failure);
+}
+
+TEST_F(NginxConfigParserTest, OpenBracesConfig) {
+  bool failure = parser.Parse("open_braces_config", &out_config);
+
+  EXPECT_FALSE(failure);
+}
+
+TEST_F(NginxConfigParserTest, QuoteEndConfig) {
+  bool failure = parser.Parse("quote_end_config", &out_config);
+
+  EXPECT_FALSE(failure);
+}
+
+TEST_F(NginxConfigParserTest, StatementEndConfig) {
+  bool failure = parser.Parse("statement_end_config", &out_config);
+
+  EXPECT_FALSE(failure);
+}
+
+TEST_F(NginxConfigParserTest, ForeignLanguageConfig) {
+  bool success = parser.Parse("foreign_language_config", &out_config);
 
   EXPECT_TRUE(success);
 }

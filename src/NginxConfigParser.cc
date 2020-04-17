@@ -173,8 +173,8 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       //  or if there is no matching '{'
       if (( (last_token_type != TOKEN_TYPE_STATEMENT_END) &&
             (last_token_type != TOKEN_TYPE_END_BLOCK) &&
-            (last_token_type != TOKEN_TYPE_START_BLOCK)
-          ) || bracket_stack.empty()) {
+            (last_token_type != TOKEN_TYPE_START_BLOCK) )
+            || bracket_stack.empty()) {
         // Error.
         break;
       }
