@@ -269,3 +269,40 @@ en-US,en;q=0.9\r\n\r\n";
 
     EXPECT_EQ(request_.headers, request_header);
 }
+
+
+
+TEST_F(RequestParserTest, GETRequestNoNewLine2) {
+    char data[] = "GET /test.html HTTP/3.1\r\n\
+User-Agent: Chrome\rHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestNoSpaceBeforeHeaderValue) {
+    char data[] = "GET /test.html HTTP/3.1\r\n\
+User-Agent:Chrome\r\nHost: 127.0.0.1\r\n\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestInvalidCharBeginning) {
+    char data[] = "{GET /test.html HTTP/3.1\r\n\
+User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, GETRequestControlCodeInHeaderValue) {
+    char data[] = "GET /test.html HTTP/3.1\r\n\
+User-Agent: '\a'Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+
+
