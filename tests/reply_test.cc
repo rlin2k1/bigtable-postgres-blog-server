@@ -68,6 +68,27 @@ TEST_F(ReplyTest, ToBufferOtherReply) {
 	EXPECT_EQ(check_status_string_, " 400 Bad Request\r\n");
 }
 
+TEST_F(ReplyTest, ReplyToBuffersTest) {
+	
+	reply_.status = http::server::reply::status_type::ok;
+	reply_.headers.push_back(http::server::header{"User-Agent", "Firefox"});
+	reply_.headers.push_back(http::server::header{"Host", "127.1.1.1"});
+	reply_.headers.push_back(http::server::header{"Content-Length", "0"});
+	std::vector<boost::asio::const_buffer> buffers = reply_.to_buffers();
+	std::string useragent(boost::asio::buffer_cast<const char*>(buffers[1]));
+	std::string useragentval(boost::asio::buffer_cast<const char*>(buffers[3]));
+	std::string host(boost::asio::buffer_cast<const char*>(buffers[5]));
+	std::string hostval(boost::asio::buffer_cast<const char*>(buffers[7]));
+	std::string contentlength(boost::asio::buffer_cast<const char*>(buffers[9]));
+	std::string contentlengthval(boost::asio::buffer_cast<const char*>(buffers[11]));
+	EXPECT_EQ(useragent, "User-Agent");
+	EXPECT_EQ(useragentval, "Firefox");
+	EXPECT_EQ(host, "Host");
+	EXPECT_EQ(hostval, "127.1.1.1");
+	EXPECT_EQ(contentlength, "Content-Length");
+	EXPECT_EQ(contentlengthval, "0");
+}
+
 TEST_F(ReplyTest, StockRepliesToStringOtherRequest) {
 	
 	reply_ = http::server::reply::stock_reply(http::server::reply::not_implemented);
