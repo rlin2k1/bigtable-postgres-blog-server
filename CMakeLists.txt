@@ -49,11 +49,15 @@ target_link_libraries(config_parser_test session_server_lib gtest_main)
 add_executable(request_parser_handler_test tests/request_handler_test.cc tests/request_parser_test.cc)
 target_link_libraries(request_parser_handler_test Boost::system session_server_lib gtest_main)
 
+add_executable(reply_test tests/reply_test.cc)
+target_link_libraries(reply_test Boost::system session_server_lib gtest_main)
+
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(request_parser_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(reply_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
 
-generate_coverage_report(TARGETS webserver session_server_lib TESTS config_parser_test request_parser_handler_test)
+generate_coverage_report(TARGETS webserver session_server_lib TESTS config_parser_test request_parser_handler_test reply_test)
