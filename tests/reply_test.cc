@@ -24,48 +24,24 @@ TEST_F(ReplyTest, ToBufferOKReply) {
 
 	const_buffer_ = http::server::status_strings::to_buffer(http::server::reply::ok);
 	const_buffer_size_ = boost::asio::buffer_size(const_buffer_);
-	read_buff_ptr_ = boost::asio::buffer_cast<unsigned const char*>(const_buffer_);
-	std::string check_status_string_ = "";
-
-	for (int i = 0; i < const_buffer_size_; i++){
-		if(*(read_buff_ptr_)!= '\0')
-			check_status_string_ += *(read_buff_ptr_);
-		read_buff_ptr_++;
-	}
-
-	EXPECT_EQ(check_status_string_, " 200 OK\r\n");
+	std::string check_status_string_(boost::asio::buffer_cast<const char*>(const_buffer_));
+	EXPECT_EQ(check_status_string_, "HTTP/1.0 200 OK\r\n");
 }
 
 TEST_F(ReplyTest, ToBufferBADReply) {
 
 	const_buffer_ = http::server::status_strings::to_buffer(http::server::reply::bad_request);
 	const_buffer_size_ = boost::asio::buffer_size(const_buffer_);
-	read_buff_ptr_ = boost::asio::buffer_cast<unsigned const char*>(const_buffer_);
-	std::string check_status_string_ = "";
-
-	for (int i = 0; i < const_buffer_size_; i++){
-		if(*(read_buff_ptr_)!= '\0')
-			check_status_string_ += *(read_buff_ptr_);
-		read_buff_ptr_++;
-	}
-
-	EXPECT_EQ(check_status_string_, " 400 Bad Request\r\n");
+	std::string check_status_string_(boost::asio::buffer_cast<const char*>(const_buffer_));
+	EXPECT_EQ(check_status_string_, "HTTP/1.0 400 Bad Request\r\n");
 }
 
 TEST_F(ReplyTest, ToBufferOtherReply) {
 
 	const_buffer_ = http::server::status_strings::to_buffer(http::server::reply::not_implemented);
 	const_buffer_size_ = boost::asio::buffer_size(const_buffer_);
-	read_buff_ptr_ = boost::asio::buffer_cast<unsigned const char*>(const_buffer_);
-	std::string check_status_string_ = "";
-
-	for (int i = 0; i < const_buffer_size_; i++){
-		if(*(read_buff_ptr_)!= '\0')
-			check_status_string_ += *(read_buff_ptr_);
-		read_buff_ptr_++;
-	}
-
-	EXPECT_EQ(check_status_string_, " 400 Bad Request\r\n");
+	std::string check_status_string_(boost::asio::buffer_cast<const char*>(const_buffer_));
+	EXPECT_EQ(check_status_string_, "HTTP/1.0 400 Bad Request\r\n");
 }
 
 TEST_F(ReplyTest, ReplyToBuffersTest) {

@@ -20,19 +20,14 @@ namespace status_strings {
 
 boost::asio::const_buffer to_buffer(reply::status_type status)
 {
-  // Had to redefine strings since they are in reply.h and out of scope.
-  const std::string ok =
-  "HTTP/1.0 200 OK\r\n";
-  const std::string bad_request =
-  "HTTP/1.0 400 Bad Request\r\n";
   switch (status)
   {
   case reply::ok:
-    return boost::asio::buffer(ok);
+    return boost::asio::buffer(http::server::status_strings::ok);
   case reply::bad_request:
-    return boost::asio::buffer(bad_request);
+    return boost::asio::buffer(http::server::status_strings::bad_request);
   default:
-    return boost::asio::buffer(bad_request);
+    return boost::asio::buffer(http::server::status_strings::bad_request);
   }
 }
 
@@ -59,20 +54,13 @@ namespace stock_replies {
 
 std::string to_string(reply::status_type status)
 {
-  // Had to redefine bad_request since it is in reply.h and out of scope.
-  const char bad_request[] =
-  "<html>"
-  "<head><title>Bad Request</title></head>"
-  "<body><h1>400 Bad Request</h1></body>"
-  "</html>";
-
   switch (status)
   {
     case reply::bad_request:{
-      return bad_request;
+      return http::server::stock_replies::bad_request;
     }
     default:
-      return bad_request;
+      return http::server::stock_replies::bad_request;
   }
 }
 } // namespace stock_replies
