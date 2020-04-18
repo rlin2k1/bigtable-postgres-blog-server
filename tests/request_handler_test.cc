@@ -313,4 +313,3 @@ once upon a time.............................\
     http::server::header{"Content-Type", "text/plain"}};
     EXPECT_EQ(reply_.headers, reply_header);
 }
-

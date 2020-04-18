@@ -30,6 +30,8 @@ TEST_F(RequestParserTest, ParseGETRequest) {
     EXPECT_EQ(request_.uri, "/index.html");
     EXPECT_EQ(request_.http_version_major, 1);
     EXPECT_EQ(request_.http_version_minor, 1);
+    EXPECT_FALSE(request_.keep_alive);
+
     EXPECT_TRUE(request_.headers.empty());
 }
 
@@ -48,6 +50,8 @@ TEST_F(RequestParserTest, ParseTwoPartGETRequest) {
     EXPECT_EQ(request_.uri, "/index.html");
     EXPECT_EQ(request_.http_version_major, 1);
     EXPECT_EQ(request_.http_version_minor, 1);
+    EXPECT_FALSE(request_.keep_alive);
+
     EXPECT_TRUE(request_.headers.empty());
 }
 
@@ -84,6 +88,7 @@ User-Agent: nc/0.01\r\nHost: 127.0.0.1\r\nAccept: */*\r\nContent-Length: 4\r\n\r
     EXPECT_EQ(request_.uri, "/");
     EXPECT_EQ(request_.http_version_major, 2);
     EXPECT_EQ(request_.http_version_minor, 1);
+    EXPECT_FALSE(request_.keep_alive);
 
     std::vector<http::server::header> request_header {
         http::server::header{"User-Agent", "nc/0.01"},
@@ -107,6 +112,7 @@ User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
     EXPECT_EQ(request_.uri, "/test.html");
     EXPECT_EQ(request_.http_version_major, 3);
     EXPECT_EQ(request_.http_version_minor, 1);
+    EXPECT_FALSE(request_.keep_alive);
 
     std::vector<http::server::header> request_header {
         http::server::header{"User-Agent", "Chrome"},
@@ -129,6 +135,7 @@ name1=value1&name2=value2";
     EXPECT_EQ(request_.uri, "/test/test.php");
     EXPECT_EQ(request_.http_version_major, 1);
     EXPECT_EQ(request_.http_version_minor, 0);
+    EXPECT_FALSE(request_.keep_alive);
 
     std::vector<http::server::header> request_header {
         http::server::header{"User-Agent", "Firefox"},
@@ -150,6 +157,7 @@ User-Agent: Firefox\r\nHost: 127.1.1.1\r\nContent-Length: 0\r\n\r\n";
     EXPECT_EQ(request_.uri, "/test/test.php");
     EXPECT_EQ(request_.http_version_major, 1);
     EXPECT_EQ(request_.http_version_minor, 0);
+    EXPECT_FALSE(request_.keep_alive);
 
     std::vector<http::server::header> request_header {
         http::server::header{"User-Agent", "Firefox"},
@@ -194,6 +202,7 @@ a...................................................................\
     EXPECT_EQ(request_.uri, "/test/test.php");
     EXPECT_EQ(request_.http_version_major, 1);
     EXPECT_EQ(request_.http_version_minor, 0);
+    EXPECT_FALSE(request_.keep_alive);
 
     std::vector<http::server::header> request_header {
         http::server::header{"User-Agent", "Firefox"},
@@ -229,6 +238,7 @@ once upon a timea............................................................\
     EXPECT_EQ(request_.uri, "/test/test.php");
     EXPECT_EQ(request_.http_version_major, 1);
     EXPECT_EQ(request_.http_version_minor, 0);
+    EXPECT_FALSE(request_.keep_alive);
 
     std::vector<http::server::header> request_header {
         http::server::header{"User-Agent", "Firefox"},
@@ -256,6 +266,7 @@ en-US,en;q=0.9\r\n\r\n";
     EXPECT_EQ(request_.uri, "/");
     EXPECT_EQ(request_.http_version_major, 1);
     EXPECT_EQ(request_.http_version_minor, 1);
+    EXPECT_TRUE(request_.keep_alive);
 
     std::vector<http::server::header> request_header {
         http::server::header{"Host", "34.83.52.12"},
@@ -337,6 +348,7 @@ User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
     EXPECT_EQ(request_.uri, "/test.html");
     EXPECT_EQ(request_.http_version_major, 13);
     EXPECT_EQ(request_.http_version_minor, 1);
+    EXPECT_FALSE(request_.keep_alive);
 
     std::vector<http::server::header> request_header {
         http::server::header{"User-Agent", "Chrome"},
@@ -358,6 +370,7 @@ User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
     EXPECT_EQ(request_.uri, "/test.html");
     EXPECT_EQ(request_.http_version_major, 3);
     EXPECT_EQ(request_.http_version_minor, 12);
+    EXPECT_FALSE(request_.keep_alive);
 
     std::vector<http::server::header> request_header {
         http::server::header{"User-Agent", "Chrome"},
@@ -503,6 +516,7 @@ User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
     EXPECT_EQ(request_.uri, "/test.html");
     EXPECT_EQ(request_.http_version_major, 3);
     EXPECT_EQ(request_.http_version_minor, 1);
+    EXPECT_FALSE(request_.keep_alive);
 
     std::vector<http::server::header> request_header {
         http::server::header{"User-Agent", "Chrome"},
@@ -551,4 +565,28 @@ User-Agent: Chrome\r\nHost: 127.0.0.1\r\n\t\vAccept: */*\r\n\r\n";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + strlen(data));
     EXPECT_EQ(result, http::server::request_parser::bad);
+}
+
+TEST_F(RequestParserTest, ConnectionKeepAlive) {
+    char data[] = "GET /index.html HTTP/1.1\r\n\
+Connection: Keep-Alive\r\nUser-Agent: Chrome\r\n\
+Host: 127.0.0.1\r\nAccept: */*\r\n\r\n";
+    std::tie(result, std::ignore) = request_parser_.parse(
+              request_, data, data + strlen(data));
+    EXPECT_EQ(result, http::server::request_parser::good);
+
+    EXPECT_EQ(request_.method, "GET");
+    EXPECT_EQ(request_.uri, "/index.html");
+    EXPECT_EQ(request_.http_version_major, 1);
+    EXPECT_EQ(request_.http_version_minor, 1);
+    EXPECT_TRUE(request_.keep_alive);
+
+    std::vector<http::server::header> request_header {
+        http::server::header{"Connection", "Keep-Alive"},
+        http::server::header{"User-Agent", "Chrome"},
+        http::server::header{"Host", "127.0.0.1"},
+        http::server::header{"Accept", "*/*"}
+    };
+
+    EXPECT_EQ(request_.headers, request_header);
 }

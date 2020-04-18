@@ -31,6 +31,7 @@ struct request
   int bodysize;
   std::vector<char> body;
   std::vector<char> fullmessage;
+  bool keep_alive = false;
 };
 
 } // namespace server

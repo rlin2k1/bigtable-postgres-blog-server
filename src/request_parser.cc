@@ -270,6 +270,11 @@ request_parser::result_type request_parser::consume(request& req, char input)
           return bad;
         }
       }
+
+      if ( (strcasecmp(current_header.c_str(), "Connection") == 0) &&\
+      (strcasecmp(req.headers.back().value.c_str(), "Keep-Alive") == 0) ) {
+       req.keep_alive = true;
+      }
       state_ = expecting_newline_2;
       return indeterminate;
     }

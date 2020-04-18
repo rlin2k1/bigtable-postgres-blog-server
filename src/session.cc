@@ -38,9 +38,15 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
 			std::string client_http_message(request_.fullmessage.begin(), request_.fullmessage.end());
 			request_handler_.handle_request(request_, reply_, client_http_message.c_str());
 
-            boost::asio::async_write(socket_, reply_.to_buffers(),
-				boost::bind(&session::handle_write, this,
-				boost::asio::placeholders::error));
+			if (request_.keep_alive) {
+				boost::asio::async_write(socket_, reply_.to_buffers(),
+					boost::bind(&session::handle_write, this,
+					boost::asio::placeholders::error));
+			} else {
+				boost::asio::async_write(socket_, reply_.to_buffers(),
+					boost::bind(&session::shutdown, this,
+					boost::asio::placeholders::error));
+			}
         } else if (result == http::server::request_parser::bad) {
 			reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
 
