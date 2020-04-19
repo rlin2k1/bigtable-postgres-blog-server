@@ -12,6 +12,8 @@
 #include <iostream>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include <signal.h>
+#include <stdio.h>
 
 #include "server.h"
 #include "session.h"
@@ -19,7 +21,13 @@
 
 using boost::asio::ip::tcp;
 
+void handle_sigterm(int sig) {
+    exit(1);
+}
+
 int main(int argc, char* argv[]) {
+  signal(SIGTERM, handle_sigterm);
+
   try {
     if (argc != 2) {
       std::cerr << "Usage: async_tcp_echo_server <config_file>\n";
@@ -36,6 +44,7 @@ int main(int argc, char* argv[]) {
       std::cerr << "Could not find valid port number in config" << std::endl;
       return 1;
     }
+
     server s(io_service, config.port_number);
 
     io_service.run();

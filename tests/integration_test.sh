@@ -146,5 +146,5 @@ rm $output_file
 # Stop the WebServer and Exit
 # ---------------------------------------------------------------------------- #
 echo "SUCCESS: PASSED ALL TESTS"
-kill -9 $WEBSERVER_PID
+kill $WEBSERVER_PID
 exit 0
