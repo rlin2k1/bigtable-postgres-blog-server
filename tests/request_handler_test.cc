@@ -3,8 +3,8 @@
 #include "header.h"
 #include "request.h"
 #include "request_parser.h"
-#include "request_handler.h"
 #include "reply.h"
+#include "echo_request_handler.h"
 
 class RequestHandlerTest : public ::testing::Test {
  protected:
@@ -13,19 +13,18 @@ class RequestHandlerTest : public ::testing::Test {
         // The parser for the incoming request.
         http::server::request_parser request_parser_;
         http::server::request_parser::result_type result;
-
         // The handler used to process the incoming request.
-        http::server::request_handler request_handler_;
+        http::server::echo_request_handler echo_request_handler_;
         // The reply to be sent back to the client.
         http::server::reply reply_;
 };
 
 TEST_F(RequestHandlerTest, GETRequest) {
-    char data[] = "GET /index.html HTTP/1.1\r\n\r\n\r\n";
+    char data[] = "GET /echo HTTP/1.1\r\n\r\n\r\n";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    request_handler_.handle_request(request_, reply_, data);
+    echo_request_handler_.handle_request(request_, reply_, data);
     EXPECT_EQ(reply_.status, http::server::reply::ok);
     EXPECT_EQ(reply_.content, data);
 
@@ -80,31 +79,36 @@ TEST_F(RequestHandlerTest, EmptyRequest) {
     EXPECT_EQ(reply_.headers, reply_header);
 }
 
-TEST_F(RequestHandlerTest, HeaderBodyRequest) {
+TEST_F(RequestHandlerTest, InvalidURI) {
     char data[] = "GET / HTTP/2.1\r\n\
 User-Agent: nc/0.01\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\nBODY";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    request_handler_.handle_request(request_, reply_, data);
-    EXPECT_EQ(reply_.status, http::server::reply::ok);
-    EXPECT_EQ(reply_.content, data);
+    reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
+
+    const char bad_request[] =
+    "<html>"
+    "<head><title>Bad Request</title></head>"
+    "<body><h1>400 Bad Request</h1></body>"
+    "</html>";
+    EXPECT_EQ(reply_.content, std::string(bad_request));
 
     std::vector<http::server::header> reply_header { \
     http::server::header{"Content-Length", \
     std::to_string(reply_.content.size())}, \
-    http::server::header{"Content-Type", "text/plain"}};
+    http::server::header{"Content-Type", "text/html"}};
     EXPECT_EQ(reply_.headers, reply_header);
 }
 
 
 TEST_F(RequestHandlerTest, EmptyBodyRequest) {
-    char data[] = "GET /test.html HTTP/3.1\r\n\
+    char data[] = "GET /echo HTTP/3.1\r\n\
 User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    request_handler_.handle_request(request_, reply_, data);
+    echo_request_handler_.handle_request(request_, reply_, data);
     EXPECT_EQ(reply_.status, http::server::reply::ok);
     EXPECT_EQ(reply_.content, data);
 
@@ -116,13 +120,13 @@ User-Agent: Chrome\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\n";
 }
 
 TEST_F(RequestHandlerTest, POSTRequest) {
-    char data[] = "POST /test/test.php HTTP/1.0\r\n\
+    char data[] = "POST /echo HTTP/1.0\r\n\
 User-Agent: Firefox\r\nHost: 127.1.1.1\r\n\r\n\
 name1=value1&name2=value2";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    request_handler_.handle_request(request_, reply_, data);
+    echo_request_handler_.handle_request(request_, reply_, data);
     EXPECT_EQ(reply_.status, http::server::reply::ok);
     EXPECT_EQ(reply_.content, data);
 
@@ -134,7 +138,7 @@ name1=value1&name2=value2";
 }
 
 TEST_F(RequestHandlerTest, LongPOSTRequest) {
-    char data[] = "POST /test/test.php HTTP/1.0\r\n\
+    char data[] = "POST /echo HTTP/1.0\r\n\
 User-Agent: Firefox\r\nHost: 127.1.1.1\r\n\r\n\
 once upon a time..............................\
 ..............................................\
@@ -172,7 +176,7 @@ the end";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    request_handler_.handle_request(request_, reply_, data);
+    echo_request_handler_.handle_request(request_, reply_, data);
     EXPECT_EQ(reply_.status, http::server::reply::ok);
     EXPECT_EQ(reply_.content, data);
 
@@ -184,7 +188,7 @@ the end";
 }
 
 TEST_F(RequestHandlerTest, TrickyLongPOSTRequest) {
-    char data[] = "POST /test/test.php HTTP/1.0\r\n\
+    char data[] = "POST /echo HTTP/1.0\r\n\
 User-Agent: Firefox\r\nHost: 127.1.1.1\r\n\r\n\
 once upon a time..............................\
 ..............................................\
@@ -225,7 +229,7 @@ the end";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    request_handler_.handle_request(request_, reply_, data);
+    echo_request_handler_.handle_request(request_, reply_, data);
     EXPECT_EQ(reply_.status, http::server::reply::ok);
     EXPECT_EQ(reply_.content, data);
 
@@ -237,7 +241,7 @@ the end";
 }
 
 TEST_F(RequestHandlerTest, Exactly1024POSTRequest) {
-    char data[] = "POST /test/test.php HTTP/1.0\r\n\
+    char data[] = "POST /echo HTTP/1.0\r\n\
 User-Agent: FirefoxrnHost: 127.1.1.1\r\n\r\n\
 once upon a time.............................\
 .............................................\
@@ -264,7 +268,7 @@ once upon a time.............................\
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    request_handler_.handle_request(request_, reply_, data);
+    echo_request_handler_.handle_request(request_, reply_, data);
     EXPECT_EQ(reply_.status, http::server::reply::ok);
     EXPECT_EQ(reply_.content, data);
 
@@ -276,7 +280,7 @@ once upon a time.............................\
 }
 
 TEST_F(RequestHandlerTest, Exactly1025POSTRequest) {
-    char data[] = "POST /test/test.php HTTP/1.0\r\n\
+    char data[] = "POST /echo HTTP/1.0\r\n\
 User-Agent: FirefoxrnHost: 127.1.1.1\r\n\r\n\
 once upon a time.............................\
 .............................................\
@@ -303,7 +307,7 @@ once upon a time.............................\
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    request_handler_.handle_request(request_, reply_, data);
+    echo_request_handler_.handle_request(request_, reply_, data);
     EXPECT_EQ(reply_.status, http::server::reply::ok);
     EXPECT_EQ(reply_.content, data);
 

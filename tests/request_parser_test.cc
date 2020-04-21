@@ -3,7 +3,7 @@
 #include "header.h"
 #include "request.h"
 #include "request_parser.h"
-#include "request_handler.h"
+#include "echo_request_handler.h"
 #include "reply.h"
 
 class RequestParserTest : public ::testing::Test {
@@ -13,9 +13,6 @@ class RequestParserTest : public ::testing::Test {
         // The parser for the incoming request.
         http::server::request_parser request_parser_;
         http::server::request_parser::result_type result;
-
-        // The handler used to process the incoming request.
-        http::server::request_handler request_handler_;
         // The reply to be sent back to the client.
         http::server::reply reply_;
 };
@@ -76,7 +73,7 @@ TEST_F(RequestParserTest, ParseEmptyRequest) {
               request_, data, data + strlen(data));
     EXPECT_EQ(result, http::server::request_parser::indeterminate);
 }
-
+// This should fail.
 TEST_F(RequestParserTest, ParseHeaderBodyRequest) {
     char data[] = "GET / HTTP/2.1\r\n\
 User-Agent: nc/0.01\r\nHost: 127.0.0.1\r\nAccept: */*\r\nContent-Length: 4\r\n\r\nBODY";

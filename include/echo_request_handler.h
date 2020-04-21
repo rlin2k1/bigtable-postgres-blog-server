@@ -1,5 +1,5 @@
 //
-// request_handler.h
+// echo_request_handler.h
 // ~~~~~~~~~~~~~~~~~~~
 //
 // Copyright (c) 2003-2017 Christopher M. Kohlhoff (chris at kohlhoff dot com)
@@ -10,16 +10,11 @@
 
 // Library Source taken from https://www.boost.org/doc/libs/1_65_1/doc/html/boost_asio/example/cpp11/http/server/request_handler.hpp
 
-#ifndef HTTP_REQUEST_HANDLER_HPP
-#define HTTP_REQUEST_HANDLER_HPP
+#ifndef HTTP_ECHO_REQUEST_HANDLER_HPP
+#define HTTP_ECHO_REQUEST_HANDLER_HPP
 
 #include <string>
-#include <fstream>
-#include <sstream>
-
-#include "request.h"
 #include "request_handler.h"
-#include "reply.h"
 
 namespace http {
 namespace server {
@@ -27,19 +22,13 @@ namespace server {
 struct reply;
 struct request;
 
-// The common handler for all incoming requests.
-class request_handler {
+// Echo handler for requests with /echo uri.
+class echo_request_handler: public request_handler {
  public:
-    request_handler(const request_handler&) = delete;
-    request_handler& operator=(const request_handler&) = delete;
-
-    request_handler() {}
-
-    // Handle a request and produce a reply.
-    virtual void handle_request(const request& req, reply& rep, const char *data) = 0;
+    virtual void handle_request(const request& req, reply& rep, const char *data);
 };
 
 }  // namespace server
 }  // namespace http
 
-#endif  // INCLUDE_REQUEST_HANDLER_H_
+#endif  // INCLUDE_ECHO_REQUEST_HANDLER_H_

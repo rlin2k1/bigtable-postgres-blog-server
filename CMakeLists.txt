@@ -35,7 +35,7 @@ message(STATUS "Boost version: ${Boost_VERSION}")
 include_directories(include)
 
 # Update name and srcs - ** we'll need to update these after refactoring
-add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParser.cc src/request_parser.cc src/reply.cc src/request_handler.cc)
+add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParser.cc src/request_parser.cc src/reply.cc src/echo_request_handler.cc)
 
 
 # Update executable name, srcs, and deps
