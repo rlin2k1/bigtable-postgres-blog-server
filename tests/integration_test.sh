@@ -28,7 +28,7 @@ sleep 0.5 # Wait for Server to Start Up
 # Run the Tests
 # ---------------------------------------------------------------------------- #
 printf "GET / HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
-Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
+Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT | tr -d '\000' > $output_file
 
 diff $output_file $TEST_DIR/$get_request_file
 
@@ -48,7 +48,7 @@ User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 \
 text/html,application/xhtml+xml,application/xml;q=0.9,\
 image/webp,image/apng,*/*;q=0.8,application/signed-exchange;\
 v=b3;q=0.9\r\nAccept-Encoding: gzip, deflate\r\nAccept-Language: \
-en-US,en;q=0.9\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
+en-US,en;q=0.9\r\n\r\n" | nc $IP_ADDRESS $PORT | tr -d '\000' > $output_file
 
 diff $output_file $TEST_DIR/$post_request_file
 
@@ -85,7 +85,7 @@ Content-Length: 1394\r\nHost: 127.1.1.1\r\n\r\nonce upon a time\
 ...............................................................\
 ...............................................................\
 ................................................the end" |\
-nc $IP_ADDRESS $PORT > $output_file
+nc $IP_ADDRESS $PORT | tr -d '\000' > $output_file
 
 diff $output_file $TEST_DIR/$long_body_request_file
 
@@ -100,7 +100,7 @@ rm $output_file
 #---------------------------------------------------------------------------------------------------
 printf "GET / HTTP/1.1\r\nConnection: Keep-Alive\r\nUser-Agent: nc/0.0.1\r\n\
 Host: 127.0.0.1\r\nAccept: */*\r\n\r\n" |\
-timeout .3 nc $IP_ADDRESS $PORT > $output_file
+timeout .3 nc $IP_ADDRESS $PORT | tr -d '\000' > $output_file
 
 diff $output_file $TEST_DIR/$keep_alive_request_file
 
@@ -116,7 +116,7 @@ rm $output_file
 printf "POST /test/test.php HTTP/1.0\r\nUser-Agent: Firefox\r\n\
 Content-Length: 30\r\nHost: 127.1.1.1\r\n\r\nonce upon a time\
 .....................................................the end" |\
-nc $IP_ADDRESS $PORT > $output_file
+nc $IP_ADDRESS $PORT | tr -d '\000' > $output_file
 
 diff $output_file $TEST_DIR/$bad_request_file
 
@@ -130,7 +130,7 @@ fi
 rm $output_file
 #---------------------------------------------------------------------------------------------------
 printf "GET / HTTP/1.1\r\nUser-Agent: nc/0.0.1\nHost: 127.0.0.1\r\n\
-Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
+Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT | tr -d '\000' > $output_file
 
 diff $output_file $TEST_DIR/$bad_request_file
 
