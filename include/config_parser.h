@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 class NginxConfig;
 
@@ -20,6 +21,11 @@ class NginxConfig {
   NginxConfig() : port_number(-1) {}
   std::vector<std::shared_ptr<NginxConfigStatement> > statements_;
   int port_number;
+
+  // key: client path, value: server path
+  std::unordered_map<std::string, std::string> static_locations_;
+  std::string echo_location_;
+  std::string root_path_;
 };
 
 // The driver that parses a config file and generates an NginxConfig.

@@ -130,3 +130,22 @@ TEST_F(NginxConfigParserTest, ForeignLanguageConfig) {
 
   EXPECT_TRUE(success);
 }
+
+TEST_F(NginxConfigParserTest, EchoAndStaticConfig) {
+  bool success = parser.Parse("echo_static_config", &out_config);
+
+  EXPECT_TRUE(success);
+
+  std::string root_path = "/usr/src/projects";
+  std::string server_static_path_1 = "/server_static_1";
+  std::string client_static_path_1 = "/client_static_1";
+  std::string server_static_path_2 = "/server_static_2";
+  std::string client_static_path_2 = "/client_static_2";
+  std::string echo_path = "/echo";
+
+  EXPECT_EQ(out_config.static_locations_.size(), 2);
+  EXPECT_EQ(out_config.root_path_, root_path);
+  EXPECT_EQ(out_config.echo_location_, echo_path);
+  EXPECT_EQ(out_config.static_locations_[client_static_path_1], server_static_path_1);
+  EXPECT_EQ(out_config.static_locations_[client_static_path_2], server_static_path_2);
+}
