@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 class NginxConfig;
 
@@ -24,7 +25,7 @@ class NginxConfig {
 
   // key: client path, value: server path
   std::unordered_map<std::string, std::string> static_locations_;
-  std::string echo_location_;
+  std::unordered_set<std::string> echo_locations_;
   std::string root_path_;
 };
 

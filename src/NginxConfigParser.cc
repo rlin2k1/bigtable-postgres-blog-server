@@ -159,7 +159,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       seen_static = false;
     }
     if (seen_servlet && seen_echo && save_location_val) {
-      config->echo_location_ = token;
+      config->echo_locations_.insert(token);
       seen_servlet = false;
       seen_static = false;
       save_location_val = false;
