@@ -2,7 +2,8 @@
 #include <iostream>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
-
+#include <regex>
+#include <string>
 #include "session.h"
 
 using boost::asio::ip::tcp;
@@ -33,20 +34,27 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
         http::server::request_parser::result_type result;
         std::tie(result, std::ignore) = request_parser_.parse(
               request_, data_, data_ + bytes_transferred);
-
         if (result == http::server::request_parser::good) {
-            std::string client_http_message(request_.fullmessage.begin(), request_.fullmessage.end());
-            echo_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
+          std::string client_http_message(request_.fullmessage.begin(), request_.fullmessage.end());
+          std::string s(request_.uri);
+          std::regex e("(/static/)(.*)");
+          if (request_.uri == "/echo") {
+              echo_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
+          } else if (std::regex_match(s,e)) {
+              static_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
+          } else { // TODO: Change strictly for echo and static
+              echo_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
+          }
 
-            if (request_.keep_alive) {
-                boost::asio::async_write(socket_, reply_.to_buffers(),
-                    boost::bind(&session::handle_write, this,
-                    boost::asio::placeholders::error));
-            } else {
-                boost::asio::async_write(socket_, reply_.to_buffers(),
-                    boost::bind(&session::shutdown, this,
-                    boost::asio::placeholders::error));
-            }
+          if (request_.keep_alive) {
+              boost::asio::async_write(socket_, reply_.to_buffers(),
+                  boost::bind(&session::handle_write, this,
+                  boost::asio::placeholders::error));
+          } else {
+              boost::asio::async_write(socket_, reply_.to_buffers(),
+                  boost::bind(&session::shutdown, this,
+                  boost::asio::placeholders::error));
+          }
         } else if (result == http::server::request_parser::bad) {
             reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
 

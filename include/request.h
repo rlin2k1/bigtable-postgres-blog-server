@@ -35,6 +35,6 @@ struct request
 };
 
 } // namespace server
-} // namespace http
+} //  http
 
 #endif // HTTP_REQUEST_HPP

@@ -26,6 +26,8 @@ boost::asio::const_buffer to_buffer(reply::status_type status)
     return boost::asio::buffer(http::server::status_strings::ok);
   case reply::bad_request:
     return boost::asio::buffer(http::server::status_strings::bad_request);
+  case reply::not_found:
+    return boost::asio::buffer(http::server::status_strings::not_found);
   default:
     return boost::asio::buffer(http::server::status_strings::bad_request);
   }
@@ -58,6 +60,9 @@ std::string to_string(reply::status_type status)
   {
     case reply::bad_request:{
       return http::server::stock_replies::bad_request;
+    }
+    case reply::not_found: {
+      return http::server::stock_replies::not_found;
     }
     default:
       return http::server::stock_replies::bad_request;
