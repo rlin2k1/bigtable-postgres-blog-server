@@ -1,5 +1,5 @@
-listen 80;
-root /usr/src/projects;
+listen 8080;
+root /usr/src/projects/mrjk-web-server;
 servlet static {
     server_location /server_static_1;
     client_location /client_static_1;

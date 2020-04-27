@@ -1,8 +1,8 @@
 HTTP/1.0 200 OK
-Content-Length: 94
+Content-Length: 99
 Content-Type: text/plain
 
-GET / HTTP/1.1
+GET /echo2 HTTP/1.1
 Connection: Keep-Alive
 User-Agent: nc/0.0.1
 Host: 127.0.0.1

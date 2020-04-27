@@ -2,13 +2,15 @@
 #include <iostream>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
-#include <regex>
+#include <boost/algorithm/string.hpp>
 #include <string>
 #include "session.h"
 
+#define DIR_INDEX 1
+
 using boost::asio::ip::tcp;
 
-session::session(boost::asio::io_service& io_service) : socket_(io_service) {}
+session::session(boost::asio::io_service& io_service, NginxConfig* config) : socket_(io_service), config_(config) {}
 
 tcp::socket& session::socket() {
     return socket_;
@@ -35,16 +37,32 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
         std::tie(result, std::ignore) = request_parser_.parse(
               request_, data_, data_ + bytes_transferred);
         if (result == http::server::request_parser::good) {
-          std::string client_http_message(request_.fullmessage.begin(), request_.fullmessage.end());
-          std::string s(request_.uri);
-          std::regex e("(/static/)(.*)");
-          if (request_.uri == "/echo") {
-              echo_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
-          } else if (std::regex_match(s,e)) {
-              static_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
-          } else { // TODO: Change strictly for echo and static
-              echo_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
-          }
+            std::string client_http_message(request_.fullmessage.begin(), request_.fullmessage.end());
+
+            // Find the root directory and target file from the client's request uri
+            std::vector<std::string> path_elements;
+            boost::split(path_elements, request_.uri, boost::is_any_of("/"));
+            std::string target_dir = "/" + path_elements[DIR_INDEX];
+            std::string target_file = path_elements[path_elements.size() - 1];
+
+            // Rebuild the uri without the root folder, which is added in the request handler
+            std::string partial_uri;
+            for (int i = DIR_INDEX + 1; i < path_elements.size(); i++) {
+                partial_uri = partial_uri + "/" + path_elements[i];
+            }
+
+            // Call the corresponding handler to handle the request
+            if (config_->echo_locations_.find(request_.uri) != config_->echo_locations_.end()) {
+                echo_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
+            } else if (config_->static_locations_.find(target_dir) != config_->static_locations_.end()) {
+                static_request_handler_.config_ = config_;
+                static_request_handler_.target_dir_ = target_dir;
+                static_request_handler_.target_file_ = target_file;
+                static_request_handler_.partial_uri_ = partial_uri;
+                static_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
+            } else { // TODO: Should probably make a default bad case handler
+                static_request_handler_.default_handle_bad_request(reply_);
+            }
 
           if (request_.keep_alive) {
               boost::asio::async_write(socket_, reply_.to_buffers(),

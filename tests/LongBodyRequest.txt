@@ -1,8 +1,8 @@
 HTTP/1.0 200 OK
-Content-Length: 1486
+Content-Length: 1477
 Content-Type: text/plain
 
-POST /test/test.php HTTP/1.0
+POST /echo HTTP/1.0
 User-Agent: Firefox
 Content-Length: 1394
 Host: 127.1.1.1

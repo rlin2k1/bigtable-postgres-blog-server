@@ -136,7 +136,7 @@ TEST_F(NginxConfigParserTest, EchoAndStaticConfig) {
 
   EXPECT_TRUE(success);
 
-  std::string root_path = "/usr/src/projects";
+  std::string root_path = "/usr/src/projects/mrjk-web-server";
   std::string server_static_path_1 = "/server_static_1";
   std::string client_static_path_1 = "/client_static_1";
   std::string server_static_path_2 = "/server_static_2";

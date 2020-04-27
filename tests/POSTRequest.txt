@@ -1,8 +1,8 @@
 HTTP/1.0 200 OK
-Content-Length: 412
+Content-Length: 407
 Content-Type: text/plain
 
-POST /index.html HTTP/1.1
+POST /echo2 HTTP/1.1
 Host: 34.83.52.12
 Upgrade-Insecure-Requests: 1
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36

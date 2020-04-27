@@ -1,1 +1,19 @@
 listen 80;
+root /usr/src/project;
+servlet static {
+    server_location /server_static_1;
+    client_location /client_static_1;
+}
+
+servlet static {
+    server_location /server_static_2;
+    client_location /client_static_2;
+}
+
+servlet echo {
+    location /echo;
+}
+
+servlet echo {
+    location /echo2;
+}

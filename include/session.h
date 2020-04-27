@@ -6,10 +6,11 @@
 #include "request_handler.h"
 #include "echo_request_handler.h"
 #include "static_request_handler.h"
+#include "config_parser.h"
 
 class session {
  public:
-    session(boost::asio::io_service& io_service);
+    session(boost::asio::io_service& io_service, NginxConfig* config);
     boost::asio::ip::tcp::socket& socket();
     void start();
 
@@ -35,4 +36,5 @@ class session {
     http::server::static_request_handler static_request_handler_;
     // The reply to be sent back to the client.
     http::server::reply reply_;
+    NginxConfig* config_;
 };

@@ -1,1 +1,24 @@
 listen 8080;
+
+# for local testing, use the following line:
+# root /usr/src/projects/mrjk-web-server
+
+# for running the docker and merging to master, use the following line:
+root /usr/src/project;
+servlet static {
+    server_location /server_static_1;
+    client_location /client_static_1;
+}
+
+servlet static {
+    server_location /server_static_2;
+    client_location /client_static_2;
+}
+
+servlet echo {
+    location /echo;
+}
+
+servlet echo {
+    location /echo2;
+}

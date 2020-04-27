@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
       return 1;
     }
 
-    server s(io_service, config.port_number);
+    server s(io_service, &config);
     BOOST_LOG_TRIVIAL(info) << "Successfully started web server \
 using port number "<< config.port_number;
 
