@@ -19,20 +19,14 @@
 #include "session.h"
 #include "config_parser.h"
 
-// TODO(janejiwonlee): Double check extraneous headers
-// before submission.
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
-#include <boost/log/sinks/sync_frontend.hpp>
-#include <boost/log/sinks/text_ostream_backend.hpp>
-#include <boost/log/sinks/text_file_backend.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
-#include <boost/core/null_deleter.hpp>
 
 using boost::asio::ip::tcp;
 
@@ -64,7 +58,9 @@ void logging_init() {
   logging::add_console_log(
     std::cout,
     keywords::auto_flush = true,
-    keywords::format = "%TimeStamp% | %ThreadID% | %Severity% | %Message%");
+    keywords::format = "%TimeStamp% | %ThreadID% | %Severity% | %Message%"),
+    // Appends to existing file.
+    keywords::open_mode = std::ios_base::app;
 
   // Setting a filter to log from severity level info to above.
   logging::core::get()->set_filter(
@@ -84,6 +80,7 @@ void handle_sigint(int sig) {
 int main(int argc, char* argv[]) {
   logging_init();
   logging::add_common_attributes();   // LineID, TimeStamp, ProcessID, ThreadID
+
 
   signal(SIGTERM, handle_sigterm);
   signal(SIGINT, handle_sigint);

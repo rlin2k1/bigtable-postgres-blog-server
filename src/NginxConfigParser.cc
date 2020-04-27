@@ -6,6 +6,15 @@
 #include <string>
 #include <vector>
 
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/console.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+
 #include "config_parser.h"
 
 #define MAX_PORT 65535
@@ -131,6 +140,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   std::vector<std::string> client_locations;
   std::vector<std::string> server_locations;
 
+  BOOST_LOG_TRIVIAL(info) << "Parsing configuration file...";
 
   while (true) {
     std::string token;
@@ -138,17 +148,21 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
 
     if (save_port_val) {
       SetConfigPortNumberFromToken(token, config);
+      BOOST_LOG_TRIVIAL(info) << "Port number: " << token;
       save_port_val = false;
     }
     if (save_root_val) {
       config->root_path_ = token;
+      BOOST_LOG_TRIVIAL(info) << "Root path: " << token;
       save_root_val = false;
     }
     if (seen_servlet && seen_static && save_server_location_val) {
       server_locations.push_back(token);
+      BOOST_LOG_TRIVIAL(info) << "Static servlet server location: " << token;
       save_server_location_val = false;
     } else if (seen_servlet && seen_static && save_client_location_val) {
       client_locations.push_back(token);
+      BOOST_LOG_TRIVIAL(info) << "Static servlet client location: " << token;
       save_client_location_val = false;
     }
     if (server_locations.size() > 0 && client_locations.size() > 0) {
@@ -160,6 +174,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
     }
     if (seen_servlet && seen_echo && save_location_val) {
       config->echo_locations_.insert(token);
+      BOOST_LOG_TRIVIAL(info) << "Echo location: " << token;
       seen_servlet = false;
       seen_static = false;
       save_location_val = false;
@@ -245,6 +260,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
         // Error.
         break;
       }
+      BOOST_LOG_TRIVIAL(info) << "Parsed configuration file successfully.";
       return bracket_stack.empty();
     } else {
       // Error. Unknown token.
@@ -253,9 +269,9 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
     last_token_type = token_type;
   }
 
-  printf ("Bad transition from %s to %s\n",
-          TokenTypeAsString(last_token_type),
-          TokenTypeAsString(token_type));
+  BOOST_LOG_TRIVIAL(error) << "Bad transition from "
+  << TokenTypeAsString(last_token_type) << " to " <<
+  TokenTypeAsString(token_type);
   return false;
 }
 
@@ -263,13 +279,14 @@ bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
   std::ifstream config_file;
   config_file.open(file_name);
   if (!config_file.good()) {
-    printf ("Failed to open config file: %s\n", file_name);
+    BOOST_LOG_TRIVIAL(error) << "Failed to open config file: " << file_name;
     return false;
   }
 
   const bool return_value =
       Parse(dynamic_cast<std::istream*>(&config_file), config);
   config_file.close();
+
   return return_value;
 }
 
@@ -283,12 +300,14 @@ void NginxConfigParser::SetConfigPortNumberFromToken(std::string port_token, Ngi
     }
     if (std::stoi(port_token) < 0) {
       std::cerr << "Please provide a valid port number\n";
+      BOOST_LOG_TRIVIAL(error) << "Port number "
+      << std::stoi(port_token) << " is invalid.";
     }
     if (std::stoi(port_token) >= 0 && std::stoi(port_token) <= MAX_PORT) {
       // we are given a valid port number, set our config object's port number member
       config->port_number = std::stoi(port_token);
     }
   } catch (std::exception& e) {
-    std::cerr << "Exception: " << e.what() << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "Exception: " << e.what();
   }
 }
