@@ -11,7 +11,7 @@ servlet static {
 }
 
 servlet echo {
-    location /echo1;
+    location /echo;
 }
 
 servlet echo {

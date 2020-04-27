@@ -141,7 +141,7 @@ TEST_F(NginxConfigParserTest, EchoAndStaticConfig) {
   std::string client_static_path_1 = "/client_static_1";
   std::string server_static_path_2 = "/server_static_2";
   std::string client_static_path_2 = "/client_static_2";
-  std::string first_echo_path = "/echo1";
+  std::string first_echo_path = "/echo";
   std::string second_echo_path = "/echo2";
   bool found_first_echo = out_config.echo_locations_.find(first_echo_path) != out_config.echo_locations_.end();
   bool found_second_echo = out_config.echo_locations_.find(second_echo_path) != out_config.echo_locations_.end();
