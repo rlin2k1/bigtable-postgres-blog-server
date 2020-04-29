@@ -1,0 +1,84 @@
+info | Parsing configuration file...
+info | Port number: 8080
+info | Static servlet server location: /server_static_1
+info | Static servlet client location: /client_static_1
+info | Static servlet server location: /server_static_2
+info | Static servlet client location: /client_static_2
+info | Echo location: /echo
+info | Echo location: /echo2
+info | Parsed configuration file successfully.
+info | Successfully started web server using port number 8080
+info | Successfully started new session.
+info | Parsing request...
+info | Currently serving echo requests on path: /echo
+info | Parsed request successfully.
+info | GET /echo HTTP/1.1 200 74
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Currently serving static requests on path: /client_static_1helloworld.txt/helloworld.txt
+info | Parsed request successfully.
+info | GET /client_static_1/helloworld.txt HTTP/1.1 200 100
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Currently serving static requests on path: /client_static_1nothanks.jpg/nothanks.jpg
+info | Parsed request successfully.
+info | GET /client_static_1/nothanks.jpg HTTP/1.1 200 98
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Currently serving static requests on path: /client_static_1helloworld.png/subdirectory/helloworld.png
+info | Parsed request successfully.
+info | GET /client_static_1/subdirectory/helloworld.png HTTP/1.1 200 113
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Currently serving static requests on path: /client_static_2hack.gif/hack.gif
+info | Parsed request successfully.
+info | GET /client_static_2/hack.gif HTTP/1.1 200 94
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Currently serving static requests on path: /client_static_1kek.html/kek.html
+info | Parsed request successfully.
+info | GET /client_static_1/kek.html HTTP/1.1 200 94
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Currently serving static requests on path: /client_static_1zippitydooda.zip/zippitydooda.zip
+info | Parsed request successfully.
+info | GET /client_static_1/zippitydooda.zip HTTP/1.1 200 102
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Currently serving static requests on path: /client_static_2hulkhogan.pdf/hulkhogan.pdf
+info | Parsed request successfully.
+info | GET /client_static_2/hulkhogan.pdf HTTP/1.1 200 99
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Currently serving echo requests on path: /echo2
+info | Parsed request successfully.
+info | POST /echo2 HTTP/1.1 200 407
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Parsing request...
+info | Currently serving echo requests on path: /echo
+info | Parsed request successfully.
+info | POST /echo HTTP/1.0 200 1477
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Currently serving echo requests on path: /echo2
+info | Parsed request successfully.
+info | GET /echo2 HTTP/1.1 200 99
+info | Successfully started new session.
+info | Parsing request...
+error | Request is bad. Invalid request, shutting down session.
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+error | Request is bad. Invalid request, shutting down session.
+info | Shutting down session.

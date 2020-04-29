@@ -24,6 +24,10 @@ long_body_request_file="LongBodyRequest.txt"
 keep_alive_request_file="KeepAliveRequest.txt"
 bad_request_file="BadRequest.txt"
 
+log_file="sample_0.log"
+nondeterministic_log_file="output.log"
+request_log="Request.log"
+
 # ---------------------------------------------------------------------------- #
 # Start the webserver with specified config
 # ---------------------------------------------------------------------------- #
@@ -248,6 +252,25 @@ then
 fi
 
 rm $output_file
+#---------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------- #
+# Logging Integration Tests from ALL Above Tests
+# ---------------------------------------------------------------------------- #
+cat $log_file |  sed -r -e 's/^.*\|.*\| (.*\|.*)/\1/g' | \
+sed -e '/info | Client at IP \Address: .*/d' \
+-e '/info | Root path: .*/d' -e '/info | ProcessID of server is: .*/d' \
+> $nondeterministic_log_file
+
+diff $nondeterministic_log_file $TEST_DIR/$request_log
+
+if [ $? != 0 ]
+then
+    echo "FAILED: RequestLog"
+    kill -9 $WEBSERVER_PID
+    exit 1 # Exit Failure
+fi
+
+rm $nondeterministic_log_file
 # ---------------------------------------------------------------------------- #
 # Stop the WebServer and Exit
 # ---------------------------------------------------------------------------- #
