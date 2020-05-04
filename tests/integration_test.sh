@@ -23,6 +23,7 @@ post_request_file="POSTRequest.txt"
 long_body_request_file="LongBodyRequest.txt"
 keep_alive_request_file="KeepAliveRequest.txt"
 bad_request_file="BadRequest.txt"
+not_found_request_file="NotFoundRequest.txt"
 
 log_file="sample_0.log"
 nondeterministic_log_file="output.log"
@@ -150,6 +151,34 @@ then
 fi
 
 rm $output_pdf_file
+#---------------------------------------------------------------------------------------------------
+printf "GET /client_static_1/nonexistent.txt HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
+Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
+
+diff $output_file $TEST_DIR/$not_found_request_file
+
+if [ $? != 0 ]
+then
+    echo "FAILED: GETNonexistentFile"
+    kill -9 $WEBSERVER_PID
+    exit 1 # Exit Failure
+fi
+
+rm $output_file
+#---------------------------------------------------------------------------------------------------
+printf "GET /client_static_2939/nonexistentpath.txt HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
+Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
+
+diff $output_file $TEST_DIR/$not_found_request_file
+
+if [ $? != 0 ]
+then
+    echo "FAILED: GETNonexistentPathFile"
+    kill -9 $WEBSERVER_PID
+    exit 1 # Exit Failure
+fi
+
+rm $output_file
 #---------------------------------------------------------------------------------------------------
 printf "POST /echo2 HTTP/1.1\r\nHost: 34.83.52.12\r\n\
 Upgrade-Insecure-Requests: 1\r\n\

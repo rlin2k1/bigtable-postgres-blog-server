@@ -58,6 +58,17 @@ info | GET /client_static_2/hulkhogan.pdf HTTP/1.1 200 99
 info | Shutting down session.
 info | Successfully started new session.
 info | Parsing request...
+info | Currently serving static requests on path: /client_static_1nonexistent.txt/nonexistent.txt
+info | Parsed request successfully.
+info | GET /client_static_1/nonexistent.txt HTTP/1.1 404 101
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Parsed request successfully.
+info | GET /client_static_2939/nonexistentpath.txt HTTP/1.1 404 108
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
 info | Currently serving echo requests on path: /echo2
 info | Parsed request successfully.
 info | POST /echo2 HTTP/1.1 200 407

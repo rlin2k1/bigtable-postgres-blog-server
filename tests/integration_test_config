@@ -1,7 +1,7 @@
 listen 8080;
 
 # for local testing, use the following line:
-# root /usr/src/projects/mrjk-web-server
+# root /usr/src/projects/mrjk-web-server;
 
 # for running the docker and merging to master, use the following line:
 root /usr/src/project;
