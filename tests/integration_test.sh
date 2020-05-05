@@ -30,10 +30,46 @@ nondeterministic_log_file="output.log"
 request_log="Request.log"
 
 # ---------------------------------------------------------------------------- #
+# Create Dynamic Config File
+# ---------------------------------------------------------------------------- #
+# Checks if root paths exist for dev environment. If not, use production
+root_path="/usr/src/projects/mrjk-web-server"
+if [ ! -d $root_path ]
+then
+    root_path="/usr/src/project"
+    echo "Using Production Environment Path."
+else
+    echo "Using Development Environment Path."
+fi
+
+printf "
+            listen 8080;
+
+            root $root_path;
+
+            servlet static {
+                server_location /server_static_1;
+                client_location /client_static_1;
+            }
+
+            servlet static {
+                server_location /server_static_2;
+                client_location /client_static_2;
+            }
+
+            servlet echo {
+                location /echo;
+            }
+
+            servlet echo {
+                location /echo2;
+            }
+        " > $CONFIG_NAME;
+# ---------------------------------------------------------------------------- #
 # Start the webserver with specified config
 # ---------------------------------------------------------------------------- #
 chmod +x $SRC_DIR/$BINARY_NAME
-$SRC_DIR/$BINARY_NAME $TEST_DIR/$CONFIG_NAME &
+$SRC_DIR/$BINARY_NAME $CONFIG_NAME &
 WEBSERVER_PID=$!
 
 sleep 0.5 # Wait for Server to Start Up
@@ -305,4 +341,5 @@ rm $nondeterministic_log_file
 # ---------------------------------------------------------------------------- #
 echo "SUCCESS: PASSED ALL TESTS"
 kill $WEBSERVER_PID
+rm $CONFIG_NAME
 exit 0
