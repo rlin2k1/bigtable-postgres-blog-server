@@ -1,3 +1,16 @@
+/* server.h
+Header file for server class which starts the io service.
+
+Author(s):
+    Kubilay Agi
+    Michael Gee
+    Jane Lee
+    Roy Lin
+
+Date Created:
+    April 8th, 2020
+*/
+
 #include <boost/asio.hpp>
 
 #include "config_parser.h"

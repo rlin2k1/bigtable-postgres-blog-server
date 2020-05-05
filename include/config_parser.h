@@ -1,4 +1,16 @@
-// An nginx config file parser.
+/* config_parser.h
+An nginx config file parser.
+
+Author(s):
+    Kubilay Agi
+    Michael Gee
+    Jane Lee
+    Roy Lin
+
+Date Created:
+    April 9th, 2020
+*/
+
 #ifndef NGINX_CONFIG_PARSER
 #define NGINX_CONFIG_PARSER
 

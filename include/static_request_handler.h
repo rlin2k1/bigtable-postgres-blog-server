@@ -1,14 +1,15 @@
-//
-// static_request_handler.h
-// ~~~~~~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2017 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+/* static_request_handler.h
+Header file for handling requests with the /static uri.
 
-// Library Source taken from https://www.boost.org/doc/libs/1_65_1/doc/html/boost_asio/example/cpp11/http/server/request_handler.hpp
+Author(s):
+    Kubilay Agi
+    Michael Gee
+    Jane Lee
+    Roy Lin
+
+Date Created:
+    April 21st, 2020
+*/
 
 #ifndef HTTP_STATIC_REQUEST_HANDLER_HPP
 #define HTTP_STATIC_REQUEST_HANDLER_HPP
@@ -22,7 +23,6 @@ namespace server {
 struct reply;
 struct request;
 
-// Echo handler for requests with /echo uri.
 class static_request_handler: public request_handler {
  public:
     virtual void handle_request(const request& req, reply& rep, const char *data);

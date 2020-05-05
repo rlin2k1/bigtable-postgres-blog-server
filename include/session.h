@@ -1,3 +1,16 @@
+/* session.h
+Header file for handling reads of client HTTP requests and writes of replies.
+
+Author(s):
+    Kubilay Agi
+    Michael Gee
+    Jane Lee
+    Roy Lin
+
+Date Created:
+    April 8th, 2020
+*/
+
 #include <boost/asio.hpp>
 #include <string>
 #include "request.h"
@@ -21,9 +34,6 @@ class session {
     std::string get_entire_request();
     boost::asio::ip::tcp::socket socket_;
     enum { max_length = 1024 };
-    // TODO(Michael) Change the char array into strings, so that
-    // we can get rid of the null byte that has been affecting
-    // our output within our integration testing.
     char data_[max_length+1];
 
     // The incoming request.

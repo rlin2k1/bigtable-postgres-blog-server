@@ -1,3 +1,17 @@
+: '
+integration_test.sh
+This module contains the end-to-end integration tests for the webserver exec.
+
+Author(s):
+    Kubilay Agi
+    Michael Gee
+    Jane Lee
+    Roy Lin
+
+Date Created:
+    April 18th, 2020
+'
+
 #!/bin/bash
 ## -------------------------------------------------------------------------- ##
 ## Variable declarations
