@@ -1,14 +1,22 @@
-//
-// reply.cc
-// ~~~~~~~~~
-//
-// Copyright (c) 2003-2017 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
+/* reply.cc
+Reply creation for client reception.
 
-// Library Source taken from https://www.boost.org/doc/libs/1_65_1/doc/html/boost_asio/example/cpp11/http/server/reply.cpp
+Copyright (c) 2003-2017 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+
+Distributed under the Boost Software License, Version 1.0. (See accompanying
+file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+Library Source taken from https://www.boost.org/doc/libs/1_65_1/doc/html/boost_asio/example/cpp11/http/server/reply.cpp
+
+Author(s):
+    Kubilay Agi
+    Michael Gee
+    Jane Lee
+    Roy Lin
+
+Date Created:
+    April 11th, 2020
+*/
 
 #include "reply.h"
 #include <string>
