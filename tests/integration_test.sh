@@ -286,7 +286,7 @@ rm $output_file
 # Logging Integration Tests from ALL Above Tests
 # ---------------------------------------------------------------------------- #
 cat $log_file |  sed -r -e 's/^.*\|.*\| (.*\|.*)/\1/g' | \
-sed -e '/info | Client at IP \Address: .*/d' \
+sed -e '/info | Client at IP Address: .*/d' \
 -e '/info | Root path: .*/d' -e '/info | ProcessID of server is: .*/d' \
 > $nondeterministic_log_file
 
