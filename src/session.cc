@@ -96,7 +96,7 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
                 "Currently serving static requests on path: " <<
                 target_dir << target_file << partial_uri;
                 static_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
-            } else { // TODO: Should probably make a default bad case handler
+            } else { //  TODO: Should probably make a default bad case handler
                 static_request_handler_.default_handle_bad_request(reply_);
             }
 
@@ -117,7 +117,7 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
                   boost::bind(&session::shutdown, this,
                   boost::asio::placeholders::error));
           }
-        } else if (result == http::server::request_parser::bad) {
+        } else if (result == http::server::request_parser::bad) { // Return a bad request reply if request parser can't parse properly
             reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
             BOOST_LOG_TRIVIAL(error) << "Request is bad. Invalid request,\
  shutting down session.";

@@ -57,6 +57,7 @@ void server::start_accept() {
     						boost::asio::placeholders::error));
 }
 
+//  Creates new session for the user
 void server::handle_accept(session* new_session, const boost::system::error_code& error) {
 	if (!error)	{
 		boost::system::error_code ec;
