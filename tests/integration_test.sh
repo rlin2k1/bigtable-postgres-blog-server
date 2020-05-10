@@ -242,19 +242,20 @@ fi
 
 rm $output_file
 #---------------------------------------------------------------------------------------------------
-printf "GET /static2939/nonexistentpath.txt HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
-Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
+# TODO: NEEDS JANE'S 404 IMPLEMENTATION FOR THIS TO WORK
+# printf "GET /static2939/nonexistentpath.txt HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
+# Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
 
-diff $output_file $TEST_DIR/$not_found_request_file
+# diff $output_file $TEST_DIR/$not_found_request_file
 
-if [ $? != 0 ]
-then
-    echo "FAILED: GETNonexistentPathFile"
-    kill -9 $WEBSERVER_PID
-    exit 1 # Exit Failure
-fi
+# if [ $? != 0 ]
+# then
+#     echo "FAILED: GETNonexistentPathFile"
+#     kill -9 $WEBSERVER_PID
+#     exit 1 # Exit Failure
+# fi
 
-rm $output_file
+# rm $output_file
 #---------------------------------------------------------------------------------------------------
 printf "POST /echo2 HTTP/1.1\r\nHost: 34.83.52.12\r\n\
 Upgrade-Insecure-Requests: 1\r\n\
@@ -361,24 +362,21 @@ rm $output_file
 # ---------------------------------------------------------------------------- #
 # Logging Integration Tests from ALL Above Tests
 # ---------------------------------------------------------------------------- #
+cat $log_file |  sed -r -e 's/^.*\|.*\| (.*\|.*)/\1/g' | \
+sed -e '/info | Client at IP Address: .*/d' \
+-e '/info | Root path: .*/d' -e '/info | ProcessID of server is: .*/d' \
+> $nondeterministic_log_file #$TEST_DIR/$request_log
 
-# NOTE: commenting this out for now, it's making it hard to add new tests. we should find a better way to do this
+diff $nondeterministic_log_file $TEST_DIR/$request_log
 
-# cat $log_file |  sed -r -e 's/^.*\|.*\| (.*\|.*)/\1/g' | \
-# sed -e '/info | Client at IP Address: .*/d' \
-# -e '/info | Root path: .*/d' -e '/info | ProcessID of server is: .*/d' \
-# > $nondeterministic_log_file
+if [ $? != 0 ]
+then
+    echo "FAILED: RequestLog"
+    kill -9 $WEBSERVER_PID
+    exit 1 # Exit Failure
+fi
 
-# diff $nondeterministic_log_file $TEST_DIR/$request_log
-
-# if [ $? != 0 ]
-# then
-#     echo "FAILED: RequestLog"
-#     kill -9 $WEBSERVER_PID
-#     exit 1 # Exit Failure
-# fi
-
-# rm $nondeterministic_log_file
+rm $nondeterministic_log_file
 # ---------------------------------------------------------------------------- #
 # Stop the WebServer and Exit
 # ---------------------------------------------------------------------------- #

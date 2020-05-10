@@ -39,36 +39,35 @@ namespace attrs = boost::log::attributes;
 
 using boost::asio::ip::tcp;
 
-server::server(boost::asio::io_service& io_service, NginxConfig* config) :
-				io_service_(io_service), config_(config), acceptor_(io_service,
-				tcp::endpoint(tcp::v4(), config->port_number)) {
+server::server(boost::asio::io_service& io_service, NginxConfig* config, request_dispatcher* request_dispatcher) :
+                                io_service_(io_service), config_(config), request_dispatcher_(request_dispatcher), acceptor_(io_service,
+                                tcp::endpoint(tcp::v4(), config->port_number)) {
 
-	BOOST_LOG_TRIVIAL(info) << "ProcessID of server is: "
-<< ::getpid();
+        BOOST_LOG_TRIVIAL(info) << "ProcessID of server is: " ::getpid();
 
-	start_accept();
+        start_accept();
 }
 
 void server::start_accept() {
-    session* new_session = new session(io_service_, config_);
+    session* new_session = new session(io_service_, config_, request_dispatcher_);
     acceptor_.async_accept(new_session->socket(),
-    						boost::bind(&server::handle_accept,
-    						this, new_session,
-    						boost::asio::placeholders::error));
+                                                boost::bind(&server::handle_accept,
+                                                this, new_session,
+                                                boost::asio::placeholders::error));
 }
 
 //  Creates new session for the user
 void server::handle_accept(session* new_session, const boost::system::error_code& error) {
-	if (!error)	{
-		boost::system::error_code ec;
-		boost::asio::ip::tcp::endpoint endpoint = new_session->socket().remote_endpoint(ec);
-    	BOOST_LOG_TRIVIAL(info) << "Successfully started new session.";
-		BOOST_LOG_TRIVIAL(info) << "Client at IP Address: " << endpoint;
+        if (!error)	{
+                boost::system::error_code ec;
+                boost::asio::ip::tcp::endpoint endpoint = new_session->socket().remote_endpoint(ec);
+        BOOST_LOG_TRIVIAL(info) << "Successfully started new session.";
+                BOOST_LOG_TRIVIAL(info) << "Client at IP Address: " << endpoint;
 
-    	new_session->start();
+        new_session->start();
     } else {
-		BOOST_LOG_TRIVIAL(error) << "Error accepting session.";
-      	delete new_session;
+                BOOST_LOG_TRIVIAL(error) << "Error accepting session.";
+        delete new_session;
     }
     start_accept();
 }

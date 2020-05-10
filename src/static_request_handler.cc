@@ -14,13 +14,23 @@ Date Created:
 #include <fstream>
 #include <string>
 #include <unordered_map>
+#include <boost/algorithm/string.hpp>
+#include <boost/log/trivial.hpp>
 
 #include "request.h"
 #include "reply.h"
 #include "static_request_handler.h"
 
+#define DIR_INDEX 1
+
 namespace http {
 namespace server {
+  static_request_handler::static_request_handler(NginxConfig* config) : config_(config){}
+
+  static_request_handler* static_request_handler::Init(NginxConfig* config) {
+        return new static_request_handler(config);
+    }
+
   std::unordered_map<std::string, std::string> mappings(
   {
       { "gif", "image/gif" },
@@ -37,7 +47,7 @@ namespace server {
   // Return a Not found reply if there are no echo or
   // static uris that can be handled
   void static_request_handler::default_handle_bad_request(reply& rep) {
-      // TODO(mkgee): add a default handle bad request
+      // TODO(Jane): add a default handle bad request
       // that can handle various bad requests
       rep.status = reply::not_found;
       rep.content = http::server::stock_replies::not_found;
@@ -60,7 +70,35 @@ namespace server {
     return "text/plain";
   }
 
-  void static_request_handler::handle_request(const request& req, reply& rep,  const char *data) {
+  void static_request_handler::handle_request(request& req, reply& rep,  const char *data) {
+    // Find the root directory and target file from the client's request uri
+    std::vector<std::string> path_elements;
+    size_t space_index = 0;
+    while (true) {
+        space_index = req.uri.find("%20", space_index);
+        if (space_index == std::string::npos) {
+            break;
+        }
+        req.uri.replace(space_index, 3, " ");
+    }
+
+    boost::split(path_elements, req.uri, boost::is_any_of("/"));
+    std::string target_dir = "/" + path_elements[DIR_INDEX];
+    std::string target_file = path_elements[path_elements.size() - 1];
+
+    // Rebuild the uri without the root folder, which is added in the request handler
+    std::string partial_uri;
+    for (int i = DIR_INDEX + 1; i < path_elements.size(); i++) {
+        partial_uri = partial_uri + "/" + path_elements[i];
+    }
+
+    target_dir_ = target_dir;
+    target_file_ = target_file;
+    partial_uri_ = partial_uri;
+
+    BOOST_LOG_TRIVIAL(info) << "Currently serving static requests on path: " << target_dir << partial_uri;
+
+    //--------------------------------------------------------------------------
     // Fill out the reply to be sent to the client.
     std::string file_name = config_->static_locations_[target_dir_] + partial_uri_;
     std::ifstream send_file;

@@ -20,10 +20,11 @@ Date Created:
 #include "echo_request_handler.h"
 #include "static_request_handler.h"
 #include "config_parser.h"
+#include "request_dispatcher.h"
 
 class session {
  public:
-    session(boost::asio::io_service& io_service, NginxConfig* config);
+    session(boost::asio::io_service& io_service, NginxConfig* config, request_dispatcher* request_dispatcher_);
     boost::asio::ip::tcp::socket& socket();
     void start();
 
@@ -36,15 +37,10 @@ class session {
     enum { max_length = 1024 };
     char data_[max_length+1];
 
-    // The incoming request.
     http::server::request request_;
-    // The parser for the incoming request.
     http::server::request_parser request_parser_;
-    // The handler used to process the incoming request.
-    http::server::echo_request_handler echo_request_handler_;
-    // Handler used to parse files.
-    http::server::static_request_handler static_request_handler_;
-    // The reply to be sent back to the client.
     http::server::reply reply_;
+
     NginxConfig* config_;
+    request_dispatcher* request_dispatcher_;
 };

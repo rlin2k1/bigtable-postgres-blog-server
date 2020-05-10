@@ -38,13 +38,16 @@ struct request;
 // The common handler for all incoming requests.
 class request_handler {
  public:
-    request_handler(const request_handler&) = delete;
-    request_handler& operator=(const request_handler&) = delete;
-
     request_handler() {}
 
-    // Handle a request and produce a reply.
-    virtual void handle_request(const request& req, reply& rep, const char *data) = 0;
+    // Copy constructor cannot be implemented in subclass
+    request_handler(const request_handler&) = delete;
+    // Assignment operator cannot be implemented in subclass
+    request_handler& operator=(const request_handler&) = delete;
+
+    // Handle a request and produce a reply
+    // Pure virtual function. We need to derive from and then implement this method
+    virtual void handle_request(request& req, reply& rep, const char *data) = 0;
 };
 
 }  // namespace server

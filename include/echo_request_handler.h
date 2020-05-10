@@ -16,6 +16,7 @@ Date Created:
 
 #include <string>
 #include "request_handler.h"
+#include "config_parser.h"
 
 namespace http {
 namespace server {
@@ -25,7 +26,9 @@ struct request;
 
 class echo_request_handler: public request_handler {
  public:
-    virtual void handle_request(const request& req, reply& rep, const char *data);
+    static echo_request_handler* Init(NginxConfig* config);
+
+    virtual void handle_request(request& req, reply& rep, const char *data);
 };
 
 }  // namespace server

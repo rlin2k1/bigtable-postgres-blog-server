@@ -35,7 +35,7 @@ message(STATUS "Boost version: ${Boost_VERSION}")
 include_directories(include)
 
 # Update name and srcs - ** we'll need to update these after refactoring
-add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParser.cc src/request_parser.cc src/reply.cc src/static_request_handler.cc  src/echo_request_handler.cc)
+add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParser.cc src/request_parser.cc src/reply.cc src/static_request_handler.cc  src/echo_request_handler.cc src/request_dispatcher.cc)
 
 
 # Update executable name, srcs, and deps
@@ -47,7 +47,7 @@ add_executable(config_parser_test tests/config_parser_test.cc)
 target_link_libraries(config_parser_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log)
 
 add_executable(request_parser_handler_test tests/request_handler_test.cc tests/request_parser_test.cc)
-target_link_libraries(request_parser_handler_test Boost::system session_server_lib gtest_main)
+target_link_libraries(request_parser_handler_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log)
 
 add_executable(reply_test tests/reply_test.cc)
 target_link_libraries(reply_test Boost::system session_server_lib gtest_main)

@@ -18,10 +18,10 @@ Date Created:
 
 #include <cstdlib>
 #include <iostream>
+#include <string>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
-#include <string>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
@@ -37,7 +37,7 @@ Date Created:
 
 using boost::asio::ip::tcp;
 
-session::session(boost::asio::io_service& io_service, NginxConfig* config) : socket_(io_service), config_(config) {}
+session::session(boost::asio::io_service& io_service, NginxConfig* config, request_dispatcher* request_dispatcher) : socket_(io_service), config_(config), request_dispatcher_(request_dispatcher) {}
 
 tcp::socket& session::socket() {
     return socket_;
@@ -68,46 +68,8 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
         if (result == http::server::request_parser::good) {
             std::string client_http_message(request_.fullmessage.begin(), request_.fullmessage.end());
 
-            // Find the root directory and target file from the client's request uri
-            std::vector<std::string> path_elements;
-            size_t space_index = 0;
-            while (true) {
-                space_index = request_.uri.find("%20", space_index);
-                if (space_index == std::string::npos) {
-                    break;
-                }
-                request_.uri.replace(space_index, 3, " ");
-            }
-
-            boost::split(path_elements, request_.uri, boost::is_any_of("/"));
-            std::string target_dir = "/" + path_elements[DIR_INDEX];
-            std::string target_file = path_elements[path_elements.size() - 1];
-
-            // Rebuild the uri without the root folder, which is added in the request handler
-            std::string partial_uri;
-            for (int i = DIR_INDEX + 1; i < path_elements.size(); i++) {
-                partial_uri = partial_uri + "/" + path_elements[i];
-            }
-
-            // Call the corresponding handler to handle the request
-            if (config_->echo_locations_.find(request_.uri) != config_->echo_locations_.end()) {
-                std::unordered_set<std::string>::const_iterator it =
-                config_->echo_locations_.find(request_.uri);
-                BOOST_LOG_TRIVIAL(info) <<
-                "Currently serving echo requests on path: " << *it;
-                echo_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
-            } else if (config_->static_locations_.find(target_dir) != config_->static_locations_.end()) {
-                static_request_handler_.config_ = config_;
-                static_request_handler_.target_dir_ = target_dir;
-                static_request_handler_.target_file_ = target_file;
-                static_request_handler_.partial_uri_ = partial_uri;
-                BOOST_LOG_TRIVIAL(info) <<
-                "Currently serving static requests on path: " <<
-                target_dir << target_file << partial_uri;
-                static_request_handler_.handle_request(request_, reply_, client_http_message.c_str());
-            } else { //  TODO: Should probably make a default bad case handler
-                static_request_handler_.default_handle_bad_request(reply_);
-            }
+            request_dispatcher_->get_handler(request_.uri)->handle_request(request_, reply_, client_http_message.c_str());
+            // TODO: Michael needs to change handle_request to return a Reply struct. Only take in Request struct.
 
             std::string log_client_message = client_http_message;
 

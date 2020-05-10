@@ -14,6 +14,7 @@ Date Created:
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <boost/log/trivial.hpp>
 
 #include "request.h"
 #include "reply.h"
@@ -21,7 +22,13 @@ Date Created:
 
 namespace http {
 namespace server {
-    void echo_request_handler::handle_request(const request& req, reply& rep,  const char *data) { 
+    echo_request_handler* echo_request_handler::Init(NginxConfig* config) {
+        // NginxConfig is not used for echo requests.
+        return new echo_request_handler();
+    }
+
+    void echo_request_handler::handle_request(request& req, reply& rep,  const char *data) {
+        BOOST_LOG_TRIVIAL(info) << "Currently serving echo requests on path: " << req.uri;
         // Fill out the reply to be sent to the client.
         rep.status = reply::ok;
         rep.content = data;
