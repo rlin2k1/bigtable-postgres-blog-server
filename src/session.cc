@@ -22,8 +22,6 @@ Date Created:
 #include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
 #include <string>
-#include "session.h"
-
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
@@ -32,6 +30,8 @@ Date Created:
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
+
+#include "session.h"
 
 #define DIR_INDEX 1
 
@@ -70,6 +70,15 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
 
             // Find the root directory and target file from the client's request uri
             std::vector<std::string> path_elements;
+            size_t space_index = 0;
+            while (true) {
+                space_index = request_.uri.find("%20", space_index);
+                if (space_index == std::string::npos) {
+                    break;
+                }
+                request_.uri.replace(space_index, 3, " ");
+            }
+
             boost::split(path_elements, request_.uri, boost::is_any_of("/"));
             std::string target_dir = "/" + path_elements[DIR_INDEX];
             std::string target_file = path_elements[path_elements.size() - 1];

@@ -21,8 +21,7 @@ COPY --from=builder /usr/src/project/build/bin/webserver .
 # Copy configuration file to "."
 COPY --from=builder /usr/src/project/config .
 # Copy static files to "."
-COPY server_static_1/ /usr/src/project/server_static_1/
-COPY server_static_2/ /usr/src/project/server_static_2/
+COPY files/ files/
 
 # Expose some port(s)
 EXPOSE 80

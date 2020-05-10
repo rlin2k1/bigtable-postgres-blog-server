@@ -40,7 +40,7 @@ class NginxConfig {
   // key: client path, value: server path
   std::unordered_map<std::string, std::string> static_locations_;
   std::unordered_set<std::string> echo_locations_;
-  std::string root_path_;
+  std::vector<std::string> handler_types_;
 };
 
 // The driver that parses a config file and generates an NginxConfig.

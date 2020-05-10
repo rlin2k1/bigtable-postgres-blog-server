@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "config_parser.h"
+#include <algorithm>
 
 #define CORRECT_PORT 8080
 #define INCORRECT_PORT -1
@@ -135,23 +136,39 @@ TEST_F(NginxConfigParserTest, EchoAndStaticConfig) {
   bool success = parser.Parse("echo_static_config", &out_config);
 
   EXPECT_TRUE(success);
-
-  std::string root_path = "/usr/src/projects/mrjk-web-server";
-  std::string server_static_path_1 = "/server_static_1";
-  std::string client_static_path_1 = "/client_static_1";
-  std::string server_static_path_2 = "/server_static_2";
-  std::string client_static_path_2 = "/client_static_2";
+  std::string echo_handler = "EchoHandler";
+  std::string static_handler = "StaticHandler";
+  std::string server_static_path = "./files";
+  std::string client_static_path_1 = "/static";
+  std::string client_static_path_2 = "/static2";
   std::string first_echo_path = "/echo";
   std::string second_echo_path = "/echo2";
   bool found_first_echo = out_config.echo_locations_.find(first_echo_path) != out_config.echo_locations_.end();
   bool found_second_echo = out_config.echo_locations_.find(second_echo_path) != out_config.echo_locations_.end();
+  bool found_echo_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), echo_handler) != out_config.handler_types_.end();
+  bool found_static_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), static_handler) != out_config.handler_types_.end();
 
   EXPECT_EQ(out_config.echo_locations_.size(), 2);
   EXPECT_TRUE(found_first_echo);
   EXPECT_TRUE(found_second_echo);
+  EXPECT_TRUE(found_echo_handler);
+  EXPECT_TRUE(found_static_handler);
 
   EXPECT_EQ(out_config.static_locations_.size(), 2);
-  EXPECT_EQ(out_config.root_path_, root_path);
-  EXPECT_EQ(out_config.static_locations_[client_static_path_1], server_static_path_1);
-  EXPECT_EQ(out_config.static_locations_[client_static_path_2], server_static_path_2);
+  EXPECT_EQ(out_config.static_locations_[client_static_path_1], server_static_path);
+  EXPECT_EQ(out_config.static_locations_[client_static_path_2], server_static_path);
+}
+
+TEST_F(NginxConfigParserTest, SpacePathConfig) {
+  bool success = parser.Parse("space_path_config", &out_config);
+
+  EXPECT_TRUE(success);
+  std::string echo_handler = "EchoHandler";
+  std::string echo_path = "/e cho";
+  bool found_echo = out_config.echo_locations_.find(echo_path) != out_config.echo_locations_.end();
+  bool found_echo_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), echo_handler) != out_config.handler_types_.end();
+
+  EXPECT_EQ(out_config.echo_locations_.size(), 1);
+  EXPECT_TRUE(found_echo);
+  EXPECT_TRUE(found_echo_handler);
 }

@@ -140,25 +140,19 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   TokenType last_token_type = TOKEN_TYPE_START;
   TokenType token_type;
   bool save_port_val = false;
-  bool save_location_val = false;
-  bool save_server_location_val = false;
-  bool save_client_location_val = false;
-  bool seen_servlet = false;
-  bool seen_static = false;
-  bool seen_echo = false;
+  bool seen_location = false;
   bool save_root_val = false;
+  bool expect_handler_type = false;
+  bool expect_static_root = false;
 
-  std::string port_token = "listen";
+  std::string port_token = "port";
   std::string location_token = "location";
-  std::string server_location_token = "server_location";
-  std::string client_location_token = "client_location";
-  std::string servlet_token = "servlet";
   std::string root_token = "root";
-  std::string static_token = "static";
-  std::string echo_token = "echo";
+  std::string static_token = "StaticHandler";
+  std::string echo_token = "EchoHandler";
 
-  std::vector<std::string> client_locations;
-  std::vector<std::string> server_locations;
+  std::string location;
+  std::unordered_set<std::string> seen_handlers;
 
   BOOST_LOG_TRIVIAL(info) << "Parsing configuration file...";
 
@@ -172,50 +166,47 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       save_port_val = false;
     }
     if (save_root_val) {
-      config->root_path_ = token;
-      BOOST_LOG_TRIVIAL(info) << "Root path: " << token;
-      save_root_val = false;
-    }
-    if (seen_servlet && seen_static && save_server_location_val) {
-      server_locations.push_back(token);
+      // remove the quotes
+      location = location.substr(1, location.size()-2);
+      token = token.substr(1, token.size()-2);
+      BOOST_LOG_TRIVIAL(info) << "Static servlet client location: " << location;
       BOOST_LOG_TRIVIAL(info) << "Static servlet server location: " << token;
-      save_server_location_val = false;
-    } else if (seen_servlet && seen_static && save_client_location_val) {
-      client_locations.push_back(token);
-      BOOST_LOG_TRIVIAL(info) << "Static servlet client location: " << token;
-      save_client_location_val = false;
+      config->static_locations_[location] = token;
+      expect_handler_type = false;
+      save_root_val = false;
+      expect_static_root = false;
+      seen_location = false;
+      location = "";
     }
-    if (server_locations.size() > 0 && client_locations.size() > 0) {
-      config->static_locations_[client_locations[0]] = server_locations[0];
-      server_locations.erase(server_locations.begin());
-      client_locations.erase(client_locations.begin());
-      seen_servlet = false;
-      seen_static = false;
+    if (expect_handler_type) {
+      if (seen_handlers.find(token) == seen_handlers.end()) {
+        config->handler_types_.push_back(token);
+      }
+      seen_handlers.insert(token);
+      if (token == static_token) {
+        expect_static_root = true;
+      } else if (token == echo_token) {
+        // remove the quotes
+        location = location.substr(1, location.size()-2);
+        BOOST_LOG_TRIVIAL(info) << "Echo location: " << location;
+        config->echo_locations_.insert(location);
+        location = "";
+        seen_location = false;
+        expect_handler_type = false;
+      }
     }
-    if (seen_servlet && seen_echo && save_location_val) {
-      config->echo_locations_.insert(token);
-      BOOST_LOG_TRIVIAL(info) << "Echo location: " << token;
-      seen_servlet = false;
-      seen_static = false;
-      save_location_val = false;
+    if (seen_location) {
+      location = token;
+      expect_handler_type = true;
+      seen_location = false;
     }
 
     if (token == port_token) {
       save_port_val = true;
     } else if (token == location_token) {
-      save_location_val = true;
-    } else if (token == servlet_token) {
-      seen_servlet = true;
-    } else if (token == root_token) {
+      seen_location = true;
+    } else if (expect_static_root && token == root_token) {
       save_root_val = true;
-    } else if (token == static_token) {
-      seen_static = true;
-    } else if (token == echo_token) {
-      seen_echo = true;
-    } else if (token == server_location_token) {
-      save_server_location_val = true;
-    } else if (token == client_location_token) {
-      save_client_location_val = true;
     }
 
     if (token_type == TOKEN_TYPE_ERROR) {

@@ -1,19 +1,15 @@
-listen 8080;
-root /usr/src/projects/mrjk-web-server;
-servlet static {
-    server_location /server_static_1;
-    client_location /client_static_1;
+port 8080; # The port my server listens on
+
+location "/echo" EchoHandler {
 }
 
-servlet static {
-    server_location /server_static_2;
-    client_location /client_static_2;
+location "/echo2" EchoHandler {
 }
 
-servlet echo {
-    location /echo;
+location "/static" StaticHandler {
+  root "./files";  # supports relative path
 }
 
-servlet echo {
-    location /echo2;
+location "/static2" StaticHandler {
+  root "./files";  # second path points to the same directory
 }
