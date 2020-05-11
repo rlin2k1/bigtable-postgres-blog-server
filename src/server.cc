@@ -43,7 +43,7 @@ server::server(boost::asio::io_service& io_service, NginxConfig* config, request
                                 io_service_(io_service), config_(config), request_dispatcher_(request_dispatcher), acceptor_(io_service,
                                 tcp::endpoint(tcp::v4(), config->port_number)) {
 
-        BOOST_LOG_TRIVIAL(info) << "ProcessID of server is: " ::getpid();
+        BOOST_LOG_TRIVIAL(info) << "ProcessID of server is: " << getpid();
 
         start_accept();
 }
@@ -61,7 +61,7 @@ void server::handle_accept(session* new_session, const boost::system::error_code
         if (!error)	{
                 boost::system::error_code ec;
                 boost::asio::ip::tcp::endpoint endpoint = new_session->socket().remote_endpoint(ec);
-        BOOST_LOG_TRIVIAL(info) << "Successfully started new session.";
+                BOOST_LOG_TRIVIAL(info) << "Successfully started new session.";
                 BOOST_LOG_TRIVIAL(info) << "Client at IP Address: " << endpoint;
 
         new_session->start();

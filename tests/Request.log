@@ -79,8 +79,16 @@ info | Shutting down session.
 info | Successfully started new session.
 info | Parsing request...
 info | Currently serving static requests on path: /static/nonexistent.txt
+error | Could not open file at path: ../files/nonexistent.txt
+info | Unable to open file - bad request.
 info | Parsed request successfully.
-info | GET /static/nonexistent.txt HTTP/1.1 404 92
+info | GET /static/nonexistent.txt HTTP/1.1 400 92
+info | Shutting down session.
+info | Successfully started new session.
+info | Parsing request...
+info | Request not found: 404 error.
+info | Parsed request successfully.
+info | GET /static2939/nonexistentpath.txt HTTP/1.1 404 100
 info | Shutting down session.
 info | Successfully started new session.
 info | Parsing request...

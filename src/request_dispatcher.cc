@@ -20,6 +20,7 @@ Date Created:
 #include "request_dispatcher.h"
 #include "echo_request_handler.h"
 #include "static_request_handler.h"
+#include "error_404_request_handler.h"
 
 #define DIR_INDEX 1
 
@@ -61,7 +62,11 @@ void request_dispatcher::create_handler_mapping() {
   	    // }
 
         // If handler does not exist, do not add it to the dispatcher map
-        // Default Bad Request Handler will handle! //TODO: JANE'S 404 Handler goes here
+        // Default Bad Request Handler will handle! 
+        else {
+            http::server::request_handler* error_404_request_handler = http::server::error_404_request_handler::Init(config_);
+            dispatcher["404"] = error_404_request_handler; // Set echo uri path mapping to echo handler
+        }
     }
 }
 
@@ -85,7 +90,7 @@ http::server::request_handler* request_dispatcher::get_handler(std::string uri) 
         return dispatcher[uri];
     } else if (config_->static_locations_.find(target_dir) != config_->static_locations_.end()) {
         return dispatcher[target_dir];
-    }  // else {
-        //TODO (JANE): JANE'S 404 Handler goes here
-    // }
+    }  else {
+        return dispatcher["404"];
+    }
 }

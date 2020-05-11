@@ -231,7 +231,7 @@ rm $output_pdf_file
 printf "GET /static/nonexistent.txt HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
 Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
 
-diff $output_file $TEST_DIR/$not_found_request_file
+diff $output_file $TEST_DIR/$bad_request_file
 
 if [ $? != 0 ]
 then
@@ -242,20 +242,19 @@ fi
 
 rm $output_file
 #---------------------------------------------------------------------------------------------------
-# TODO: NEEDS JANE'S 404 IMPLEMENTATION FOR THIS TO WORK
-# printf "GET /static2939/nonexistentpath.txt HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
-# Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
+printf "GET /static2939/nonexistentpath.txt HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
+Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
 
-# diff $output_file $TEST_DIR/$not_found_request_file
+diff $output_file $TEST_DIR/$not_found_request_file
 
-# if [ $? != 0 ]
-# then
-#     echo "FAILED: GETNonexistentPathFile"
-#     kill -9 $WEBSERVER_PID
-#     exit 1 # Exit Failure
-# fi
+if [ $? != 0 ]
+then
+    echo "FAILED: GETNonexistentPathFile"
+    kill -9 $WEBSERVER_PID
+    exit 1 # Exit Failure
+fi
 
-# rm $output_file
+rm $output_file
 #---------------------------------------------------------------------------------------------------
 printf "POST /echo2 HTTP/1.1\r\nHost: 34.83.52.12\r\n\
 Upgrade-Insecure-Requests: 1\r\n\
@@ -377,6 +376,7 @@ then
 fi
 
 rm $nondeterministic_log_file
+
 # ---------------------------------------------------------------------------- #
 # Stop the WebServer and Exit
 # ---------------------------------------------------------------------------- #

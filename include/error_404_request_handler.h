@@ -1,0 +1,37 @@
+/* error_404_request_handler.h
+Header file for handling requests with the / uri.
+
+Author(s):
+    Kubilay Agi
+    Michael Gee
+    Jane Lee
+    Roy Lin
+
+Date Created:
+    May 10th, 2020
+*/
+
+#ifndef HTTP_ERROR_404_REQUEST_HANDLER_HPP
+#define HTTP_ERROR_404_REQUEST_HANDLER_HPP
+
+#include <string>
+#include "request_handler.h"
+#include "config_parser.h"
+
+namespace http {
+namespace server {
+
+struct reply;
+struct request;
+
+class error_404_request_handler: public request_handler {
+ public:
+    static error_404_request_handler* Init(NginxConfig* config);
+
+    virtual void handle_request(request& req, reply& rep, const char *data);
+};
+
+}  // namespace server
+}  // namespace http
+
+#endif  // INCLUDE_ERROR_404_REQUEST_HANDLER_H_

@@ -49,8 +49,11 @@ namespace server {
   void static_request_handler::default_handle_bad_request(reply& rep) {
       // TODO(Jane): add a default handle bad request
       // that can handle various bad requests
-      rep.status = reply::not_found;
-      rep.content = http::server::stock_replies::not_found;
+      // TODO(Jane): Is there a way to leave this object and instantiate 
+      // a new bad handler object in request handler? 
+      BOOST_LOG_TRIVIAL(info) << "Unable to open file - bad request.";
+      rep.status = reply::bad_request;
+      rep.content = http::server::stock_replies::bad_request;
       rep.headers.resize(2);
       rep.headers[0].name = "Content-Length";
       rep.headers[0].value = std::to_string(rep.content.size());
@@ -104,6 +107,7 @@ namespace server {
     std::ifstream send_file;
     send_file.open(file_name.c_str());
     if (!send_file.good()) {
+      BOOST_LOG_TRIVIAL(error) << "Could not open file at path: " << file_name;
       default_handle_bad_request(rep);
     } else {
       std::vector<char> send_data;
