@@ -33,8 +33,6 @@ Date Created:
 
 #include "session.h"
 
-#define DIR_INDEX 1
-
 using boost::asio::ip::tcp;
 
 session::session(boost::asio::io_service& io_service, NginxConfig* config, request_dispatcher* request_dispatcher) : socket_(io_service), config_(config), request_dispatcher_(request_dispatcher) {}

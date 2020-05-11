@@ -37,6 +37,7 @@ long_body_request_file="LongBodyRequest.txt"
 keep_alive_request_file="KeepAliveRequest.txt"
 bad_request_file="BadRequest.txt"
 not_found_request_file="NotFoundRequest.txt"
+masked_echo_request_file="MaskedEchoGetRequest.txt"
 
 log_file="sample_0.log"
 nondeterministic_log_file="output.log"
@@ -48,6 +49,9 @@ location \"/echo\" EchoHandler {
 }
 
 location \"/echo2\" EchoHandler {
+}
+
+location \"/static/masked\" EchoHandler {
 }
 
 location \"/static\" StaticHandler {
@@ -62,6 +66,7 @@ location \"/sta tic\" StaticHandler {
   root \"../files\";  # path with a space is also supported
 }
 " > $CONFIG_NAME;
+
 # ---------------------------------------------------------------------------- #
 # Start the webserver with specified config
 # ---------------------------------------------------------------------------- #
@@ -78,6 +83,20 @@ printf "GET /echo HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
 Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
 
 diff $output_file $TEST_DIR/$get_request_file
+
+if [ $? != 0 ]
+then
+    echo "FAILED: GETRequest"
+    kill -9 $WEBSERVER_PID
+    exit 1 # Exit Failure
+fi
+
+rm $output_file
+#---------------------------------------------------------------------------------------------------
+printf "GET /static/masked HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
+Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
+
+diff $output_file $TEST_DIR/$masked_echo_request_file
 
 if [ $? != 0 ]
 then
@@ -231,7 +250,7 @@ rm $output_pdf_file
 printf "GET /static/nonexistent.txt HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
 Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
 
-diff $output_file $TEST_DIR/$bad_request_file
+diff $output_file $TEST_DIR/$not_found_request_file
 
 if [ $? != 0 ]
 then
@@ -358,24 +377,6 @@ fi
 
 rm $output_file
 #---------------------------------------------------------------------------------------------------
-# ---------------------------------------------------------------------------- #
-# Logging Integration Tests from ALL Above Tests
-# ---------------------------------------------------------------------------- #
-cat $log_file |  sed -r -e 's/^.*\|.*\| (.*\|.*)/\1/g' | \
-sed -e '/info | Client at IP Address: .*/d' \
--e '/info | Root path: .*/d' -e '/info | ProcessID of server is: .*/d' \
-> $nondeterministic_log_file #$TEST_DIR/$request_log
-
-diff $nondeterministic_log_file $TEST_DIR/$request_log
-
-if [ $? != 0 ]
-then
-    echo "FAILED: RequestLog"
-    kill -9 $WEBSERVER_PID
-    exit 1 # Exit Failure
-fi
-
-rm $nondeterministic_log_file
 
 # ---------------------------------------------------------------------------- #
 # Stop the WebServer and Exit

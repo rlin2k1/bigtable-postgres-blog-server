@@ -27,6 +27,7 @@ class request_dispatcher {
     private:
         NginxConfig* config_;
         std::unordered_map<std::string, http::server::request_handler*> dispatcher;  // URI to Handler Mapping
+        std::string longest_prefix_match(std::string uri);
 };
 
 #endif  // INCLUDE_REQUEST_DISPATCHER

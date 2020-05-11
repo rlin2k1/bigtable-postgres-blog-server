@@ -1,0 +1,9 @@
+HTTP/1.0 200 OK
+Content-Length: 83
+Content-Type: text/plain
+
+GET /static/masked HTTP/1.1
+User-Agent: nc/0.0.1
+Host: 127.0.0.1
+Accept: */*
+
