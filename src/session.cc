@@ -1,5 +1,5 @@
 /* session.cc
-Handles reads of client HTTP requests and writes of replies.
+Handles reads of client HTTP requests and writes of responses.
 
 Copyright (c) 2003-2017 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 
@@ -73,23 +73,23 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
             BOOST_LOG_TRIVIAL(info) << "Parsed request successfully.";
             BOOST_LOG_TRIVIAL(info) << request_.method << " " << request_.uri
             << " HTTP/" << request_.http_version_major << "." <<
-            request_.http_version_minor << " " << response_.status << " "
+            request_.http_version_minor << " " << response_.code_ << " "
             << client_http_message.size();
 
           if (request_.keep_alive) {
-              boost::asio::async_write(socket_, response_.to_buffers(),
+              boost::asio::async_write(socket_, ResponseHelperLibrary::to_buffers(response_),
                   boost::bind(&session::handle_write, this,
                   boost::asio::placeholders::error));
           } else {
-              boost::asio::async_write(socket_, response_.to_buffers(),
+              boost::asio::async_write(socket_, ResponseHelperLibrary::to_buffers(response_),
                   boost::bind(&session::shutdown, this,
                   boost::asio::placeholders::error));
           }
-        } else if (result == http::server::request_parser::bad) { // Return a bad request reply if request parser can't parse properly
-            response_ = http::server::reply::stock_reply(http::server::reply::bad_request);
+        } else if (result == http::server::request_parser::bad) {  // Return a bad request Response if request parser can't parse properly
+            response_ = ResponseHelperLibrary::stock_response(http::server::Response::bad_request);
             BOOST_LOG_TRIVIAL(error) << "Request is bad. Invalid request,\
  shutting down session.";
-            boost::asio::async_write(socket_, response_.to_buffers(),
+            boost::asio::async_write(socket_, ResponseHelperLibrary::to_buffers(response_),
                 boost::bind(&session::shutdown, this,
                 boost::asio::placeholders::error));
         } else {  // Keep on Reading

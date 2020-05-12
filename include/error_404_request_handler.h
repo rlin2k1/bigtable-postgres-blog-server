@@ -21,13 +21,13 @@ Date Created:
 namespace http {
 namespace server {
 
-struct reply;
+class Response;
 struct request;
 
 class error_404_request_handler: public request_handler {
  public:
     static error_404_request_handler* Init(const std::string& location_path, const NginxConfig& config);
-    virtual reply handle_request(const request& request);
+    virtual Response handle_request(const request& request);
 
  private:
     std::string error_path_;

@@ -21,13 +21,13 @@ Date Created:
 namespace http {
 namespace server {
 
-struct reply;
+class Response;
 struct request;
 
 class echo_request_handler: public request_handler {
- public:  // API uses public member functions
+ public:  // API uses public functions
     static echo_request_handler* Init(const std::string& location_path, const NginxConfig& config);
-    virtual reply handle_request(const request& request);
+    virtual Response handle_request(const request& request);
  private:
     std::string echo_path_;
 };

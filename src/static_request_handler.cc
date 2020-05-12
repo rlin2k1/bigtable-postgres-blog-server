@@ -18,8 +18,9 @@ Date Created:
 #include <boost/log/trivial.hpp>
 
 #include "request.h"
-#include "reply.h"
+#include "response.h"
 #include "static_request_handler.h"
+#include "response_helper_library.h"
 
 namespace http {
 namespace server {
@@ -44,16 +45,13 @@ std::unordered_map<std::string, std::string> mappings(
     { "pdf", "application/pdf" }
 });
 
-// Return a Not found reply if there are no echo or
+// Return a Not found Response if there are no echo or
 // static uris that can be handled
-void static_request_handler::default_bad_request(reply& response) {
-    response.status = reply::not_found;
-    response.content = http::server::stock_replies::not_found;
-    response.headers.resize(2);
-    response.headers[0].name = "Content-Length";
-    response.headers[0].value = std::to_string(response.content.size());
-    response.headers[1].name = "Content-Type";
-    response.headers[1].value = "text/html";
+void static_request_handler::default_bad_request(Response& response) {
+    response.code_ = Response::not_found;
+    response.body_ = http::server::stock_responses::not_found;
+    response.headers_["Content-Length"] = std::to_string(response.body_.size());
+    response.headers_["Content-Type"] = "text/html";
 }
 
 // Get mapping of mime type
@@ -68,9 +66,9 @@ std::string static_request_handler::get_mime_type(std::string file_name) {
     return "text/plain";
 }
 
-reply static_request_handler::handle_request(const request& request) {
+Response static_request_handler::handle_request(const request& request) {
     // Find the root directory and target file from the client's request uri
-    reply response;
+    Response response;
 
     std::string uri = request.uri;
     size_t space_index = 0;
@@ -104,7 +102,7 @@ reply static_request_handler::handle_request(const request& request) {
     BOOST_LOG_TRIVIAL(info) << "Currently serving static requests on path: " << uri;
 
     //--------------------------------------------------------------------------
-    // Fill out the reply to be sent to the client.
+    // Fill out the Response to be sent to the client.
     std::string file_name = server_root_path_ + sub_uri_path;
     std::ifstream send_file;
     send_file.open(file_name.c_str());
@@ -118,13 +116,10 @@ reply static_request_handler::handle_request(const request& request) {
             send_data.push_back(c);
         }
         std::string send_data_string(send_data.begin(), send_data.end());
-        response.status = reply::ok;
-        response.content = send_data_string;
-        response.headers.resize(2);
-        response.headers[0].name = "Content-Length";
-        response.headers[0].value = std::to_string(response.content.size());
-        response.headers[1].name = "Content-Type";
-        response.headers[1].value = get_mime_type(uri);
+        response.code_ = Response::ok;
+        response.body_ = send_data_string;
+        response.headers_["Content-Length"] = std::to_string(response.body_.size());
+        response.headers_["Content-Type"] = get_mime_type(uri);
     }
     return response;
 }

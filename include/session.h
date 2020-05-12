@@ -1,5 +1,5 @@
 /* session.h
-Header file for handling reads of client HTTP requests and writes of replies.
+Header file for handling reads of client HTTP requests and writes of responses.
 
 Author(s):
     Kubilay Agi
@@ -15,12 +15,13 @@ Date Created:
 #include <string>
 #include "request.h"
 #include "request_parser.h"
-#include "reply.h"
+#include "response.h"
 #include "request_handler.h"
 #include "echo_request_handler.h"
 #include "static_request_handler.h"
 #include "config_parser.h"
 #include "request_dispatcher.h"
+#include "response_helper_library.h"
 
 class session {
  public:
@@ -39,7 +40,7 @@ class session {
 
     http::server::request request_;
     http::server::request_parser request_parser_;
-    http::server::reply response_;
+    http::server::Response response_;
 
     NginxConfig* config_;
     request_dispatcher* request_dispatcher_;

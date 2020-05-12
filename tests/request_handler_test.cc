@@ -3,9 +3,10 @@
 #include "header.h"
 #include "request.h"
 #include "request_parser.h"
-#include "reply.h"
+#include "response.h"
 #include "echo_request_handler.h"
 #include <string>
+#include "session.h"
 
 class RequestHandlerTest : public ::testing::Test {
  protected:
@@ -16,8 +17,8 @@ class RequestHandlerTest : public ::testing::Test {
         http::server::request_parser::result_type result;
         // The handler used to process the incoming request.
         http::server::echo_request_handler echo_request_handler_;
-        // The reply to be sent back to the client.
-        http::server::reply reply_;
+        // The Response to be sent back to the client.
+        http::server::Response response_;
 };
 
 TEST_F(RequestHandlerTest, GETRequest) {
@@ -25,38 +26,33 @@ TEST_F(RequestHandlerTest, GETRequest) {
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    reply_ = echo_request_handler_.handle_request(request_);
-    // EXPECT_EQ(reply_.status, http::server::reply::ok);
-    EXPECT_EQ(reply_.content, data);
+    response_ = echo_request_handler_.handle_request(request_);
+    EXPECT_EQ(response_.code_, http::server::Response::ok);
+    EXPECT_EQ(response_.body_, data);
 
-    std::vector<http::server::header> reply_header { \
-    http::server::header{"Content-Length", \
-    std::to_string(reply_.content.size())}, \
-    http::server::header{"Content-Type", "text/plain"}};
-    // EXPECT_EQ(reply_.headers, reply_header);
+    std::map<std::string, std::string> response_header = { {"Content-Length", std::to_string(response_.body_.size())}, {"Content-Type", "text/plain"} };
+
+    EXPECT_EQ(response_.headers_, response_header);
 }
 
 TEST_F(RequestHandlerTest, BadRequest) {
     char data[] = "HTTP REQUEST GET /";
     std::tie(result, std::ignore) = request_parser_.parse(
-              request_, data, data + sizeof(data));
+             request_, data, data + sizeof(data));
 
-    reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
+    response_ = ResponseHelperLibrary::stock_response(http::server::Response::bad_request);
 
-    EXPECT_EQ(reply_.status, http::server::reply::bad_request);
+    EXPECT_EQ(response_.code_, http::server::Response::bad_request);
 
     const char bad_request[] =
     "<html>"
     "<head><title>Bad Request</title></head>"
     "<body><h1>400 Bad Request</h1></body>"
     "</html>";
-    EXPECT_EQ(reply_.content, std::string(bad_request));
+    EXPECT_EQ(response_.body_, std::string(bad_request));
 
-    std::vector<http::server::header> reply_header { \
-    http::server::header{"Content-Length", \
-    std::to_string(reply_.content.size())}, \
-    http::server::header{"Content-Type", "text/html"}};
-    EXPECT_EQ(reply_.headers, reply_header);
+    std::map<std::string, std::string> response_header = { {"Content-Length", std::to_string(response_.body_.size())}, {"Content-Type", "text/html"} };
+    EXPECT_EQ(response_.headers_, response_header);
 }
 
 TEST_F(RequestHandlerTest, EmptyRequest) {
@@ -64,20 +60,17 @@ TEST_F(RequestHandlerTest, EmptyRequest) {
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
+    response_ = ResponseHelperLibrary::stock_response(http::server::Response::bad_request);
 
     const char bad_request[] =
     "<html>"
     "<head><title>Bad Request</title></head>"
     "<body><h1>400 Bad Request</h1></body>"
     "</html>";
-    EXPECT_EQ(reply_.content, std::string(bad_request));
+    EXPECT_EQ(response_.body_, std::string(bad_request));
 
-    std::vector<http::server::header> reply_header { \
-    http::server::header{"Content-Length", \
-    std::to_string(reply_.content.size())}, \
-    http::server::header{"Content-Type", "text/html"}};
-    EXPECT_EQ(reply_.headers, reply_header);
+    std::map<std::string, std::string> response_header = { {"Content-Length", std::to_string(response_.body_.size())}, {"Content-Type", "text/html"} };
+    EXPECT_EQ(response_.headers_, response_header);
 }
 
 TEST_F(RequestHandlerTest, InvalidURI) {
@@ -86,20 +79,17 @@ User-Agent: nc/0.01\r\nHost: 127.0.0.1\r\nAccept: */*\r\n\r\nBODY";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
+    response_ = ResponseHelperLibrary::stock_response(http::server::Response::bad_request);
 
     const char bad_request[] =
     "<html>"
     "<head><title>Bad Request</title></head>"
     "<body><h1>400 Bad Request</h1></body>"
     "</html>";
-    EXPECT_EQ(reply_.content, std::string(bad_request));
+    EXPECT_EQ(response_.body_, std::string(bad_request));
 
-    std::vector<http::server::header> reply_header { \
-    http::server::header{"Content-Length", \
-    std::to_string(reply_.content.size())}, \
-    http::server::header{"Content-Type", "text/html"}};
-    EXPECT_EQ(reply_.headers, reply_header);
+   std::map<std::string, std::string> response_header = { {"Content-Length", std::to_string(response_.body_.size())}, {"Content-Type", "text/html"} };
+    EXPECT_EQ(response_.headers_, response_header);
 }
 
 
@@ -108,15 +98,12 @@ TEST_F(RequestHandlerTest, EmptyBodyRequest) {
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    reply_ = echo_request_handler_.handle_request(request_);
-    EXPECT_EQ(reply_.status, http::server::reply::ok);
-    EXPECT_EQ(reply_.content, data);
+    response_ = echo_request_handler_.handle_request(request_);
+    EXPECT_EQ(response_.code_, http::server::Response::ok);
+    EXPECT_EQ(response_.body_, data);
 
-    std::vector<http::server::header> reply_header { \
-    http::server::header{"Content-Length", \
-    std::to_string(reply_.content.size())}, \
-    http::server::header{"Content-Type", "text/plain"}};
-    EXPECT_EQ(reply_.headers, reply_header);
+    std::map<std::string, std::string> response_header = { {"Content-Length", std::to_string(response_.body_.size())}, {"Content-Type", "text/plain"} };
+    EXPECT_EQ(response_.headers_, response_header);
 }
 
 TEST_F(RequestHandlerTest, POSTRequest) {
@@ -126,15 +113,12 @@ name1=value1&name2=value2";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    reply_ = echo_request_handler_.handle_request(request_);
-    EXPECT_EQ(reply_.status, http::server::reply::ok);
-    EXPECT_EQ(reply_.content, data);
+    response_ = echo_request_handler_.handle_request(request_);
+    EXPECT_EQ(response_.code_, http::server::Response::ok);
+    EXPECT_EQ(response_.body_, data);
 
-    std::vector<http::server::header> reply_header { \
-    http::server::header{"Content-Length", \
-    std::to_string(reply_.content.size())}, \
-    http::server::header{"Content-Type", "text/plain"}};
-    EXPECT_EQ(reply_.headers, reply_header);
+    std::map<std::string, std::string> response_header = { {"Content-Length", std::to_string(response_.body_.size())}, {"Content-Type", "text/plain"} };
+    EXPECT_EQ(response_.headers_, response_header);
 }
 
 TEST_F(RequestHandlerTest, LongPOSTRequest) {
@@ -176,15 +160,12 @@ the end";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    reply_ = echo_request_handler_.handle_request(request_);
-    EXPECT_EQ(reply_.status, http::server::reply::ok);
-    EXPECT_EQ(reply_.content, data);
+    response_ = echo_request_handler_.handle_request(request_);
+    EXPECT_EQ(response_.code_, http::server::Response::ok);
+    EXPECT_EQ(response_.body_, data);
 
-    std::vector<http::server::header> reply_header { \
-    http::server::header{"Content-Length", \
-    std::to_string(reply_.content.size())}, \
-    http::server::header{"Content-Type", "text/plain"}};
-    EXPECT_EQ(reply_.headers, reply_header);
+    std::map<std::string, std::string> response_header = { {"Content-Length", std::to_string(response_.body_.size())}, {"Content-Type", "text/plain"} };
+    EXPECT_EQ(response_.headers_, response_header);
 }
 
 TEST_F(RequestHandlerTest, TrickyLongPOSTRequest) {
@@ -229,15 +210,12 @@ the end";
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    reply_ = echo_request_handler_.handle_request(request_);
-    EXPECT_EQ(reply_.status, http::server::reply::ok);
-    EXPECT_EQ(reply_.content, data);
+    response_ = echo_request_handler_.handle_request(request_);
+    EXPECT_EQ(response_.code_, http::server::Response::ok);
+    EXPECT_EQ(response_.body_, data);
 
-    std::vector<http::server::header> reply_header { \
-    http::server::header{"Content-Length", \
-    std::to_string(reply_.content.size())}, \
-    http::server::header{"Content-Type", "text/plain"}};
-    EXPECT_EQ(reply_.headers, reply_header);
+    std::map<std::string, std::string> response_header = { {"Content-Length", std::to_string(response_.body_.size())}, {"Content-Type", "text/plain"} };
+    EXPECT_EQ(response_.headers_, response_header);
 }
 
 TEST_F(RequestHandlerTest, Exactly1024POSTRequest) {
@@ -268,15 +246,12 @@ once upon a time.............................\
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    reply_ = echo_request_handler_.handle_request(request_);
-    EXPECT_EQ(reply_.status, http::server::reply::ok);
-    EXPECT_EQ(reply_.content, data);
+    response_ = echo_request_handler_.handle_request(request_);
+    EXPECT_EQ(response_.code_, http::server::Response::ok);
+    EXPECT_EQ(response_.body_, data);
 
-    std::vector<http::server::header> reply_header { \
-    http::server::header{"Content-Length", \
-    std::to_string(reply_.content.size())}, \
-    http::server::header{"Content-Type", "text/plain"}};
-    EXPECT_EQ(reply_.headers, reply_header);
+    std::map<std::string, std::string> response_header = { {"Content-Length", std::to_string(response_.body_.size())}, {"Content-Type", "text/plain"} };
+    EXPECT_EQ(response_.headers_, response_header);
 }
 
 TEST_F(RequestHandlerTest, Exactly1025POSTRequest) {
@@ -307,13 +282,10 @@ once upon a time.............................\
     std::tie(result, std::ignore) = request_parser_.parse(
               request_, data, data + sizeof(data));
 
-    reply_ = echo_request_handler_.handle_request(request_);
-    EXPECT_EQ(reply_.status, http::server::reply::ok);
-    EXPECT_EQ(reply_.content, data);
+    response_ = echo_request_handler_.handle_request(request_);
+    EXPECT_EQ(response_.code_, http::server::Response::ok);
+    EXPECT_EQ(response_.body_, data);
 
-    std::vector<http::server::header> reply_header { \
-    http::server::header{"Content-Length", \
-    std::to_string(reply_.content.size())}, \
-    http::server::header{"Content-Type", "text/plain"}};
-    EXPECT_EQ(reply_.headers, reply_header);
+    std::map<std::string, std::string> response_header = { {"Content-Length", std::to_string(response_.body_.size())}, {"Content-Type", "text/plain"} };
+    EXPECT_EQ(response_.headers_, response_header);
 }

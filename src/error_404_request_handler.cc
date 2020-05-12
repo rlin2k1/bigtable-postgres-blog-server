@@ -17,8 +17,9 @@ Date Created:
 #include <boost/log/trivial.hpp>
 
 #include "request.h"
-#include "reply.h"
+#include "response.h"
 #include "error_404_request_handler.h"
+#include "response_helper_library.h"
 
 namespace http {
 namespace server {
@@ -29,17 +30,15 @@ namespace server {
         return new error_404_request_handler();
     }
 
-    reply error_404_request_handler::handle_request(const request& request) {
+    Response error_404_request_handler::handle_request(const request& request) {
         BOOST_LOG_TRIVIAL(info) << "Request not found: 404 error.";
-        reply response;
-        // Fill out the reply to be sent to the client.
-        response.status = reply::not_found;
-        response.content = http::server::stock_replies::not_found;
-        response.headers.resize(2);
-        response.headers[0].name = "Content-Length";
-        response.headers[0].value = std::to_string(response.content.size());
-        response.headers[1].name = "Content-Type";
-        response.headers[1].value = "text/html";
+        Response response;
+
+        // Fill out the Response to be sent to the client.
+        response.code_ = Response::not_found;
+        response.body_ = http::server::stock_responses::not_found;
+        response.headers_["Content-Length"] = std::to_string(response.body_.size());
+        response.headers_["Content-Type"] = "text/html";
 
         return response;
     }

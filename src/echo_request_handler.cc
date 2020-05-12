@@ -17,7 +17,7 @@ Date Created:
 #include <boost/log/trivial.hpp>
 
 #include "request.h"
-#include "reply.h"
+#include "response.h"
 #include "echo_request_handler.h"
 
 namespace http {
@@ -29,20 +29,17 @@ namespace server {
         return erh;
     }
 
-    reply echo_request_handler::handle_request(const request& request) {
+    Response echo_request_handler::handle_request(const request& request) {
         BOOST_LOG_TRIVIAL(info) << "Currently serving echo requests on path: " << request.uri;
-        reply response;
+        Response response;
 
         std::string rf(request.fullmessage.begin(), request.fullmessage.end());
 
-        // Fill out the reply to be sent to the client.
-        response.status = reply::ok;
-        response.content = rf;
-        response.headers.resize(2);
-        response.headers[0].name = "Content-Length";
-        response.headers[0].value = std::to_string(response.content.size());
-        response.headers[1].name = "Content-Type";
-        response.headers[1].value = "text/plain";
+        // Fill out the Response to be sent to the client.
+        response.code_ = Response::ok;
+        response.body_ = rf;
+        response.headers_["Content-Length"] = std::to_string(response.body_.size());
+        response.headers_["Content-Type"] = "text/plain";
 
         return response;
     }

@@ -25,22 +25,22 @@ Date Created:
 #include <fstream>
 #include <sstream>
 
+#include "response.h"
 #include "request.h"
 #include "request_handler.h"
-#include "reply.h"
 
 namespace http {
 namespace server {
 
-struct reply;
+class Response;
 struct request;
 
 // The common handler for all incoming requests.
 class request_handler {
  public:
-    // Handle a request and produce a reply
+    // Handle a request and produce a Response
     // Pure virtual function. We need to derive from and then implement this method
-    virtual reply handle_request(const request& request) = 0;
+    virtual Response handle_request(const request& request) = 0;
     // static RequestHandler* Init(const std::string& location_path, const NginxConfig& config);
 };
 

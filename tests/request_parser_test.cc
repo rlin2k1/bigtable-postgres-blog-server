@@ -4,7 +4,7 @@
 #include "request.h"
 #include "request_parser.h"
 #include "echo_request_handler.h"
-#include "reply.h"
+#include "response.h"
 
 class RequestParserTest : public ::testing::Test {
  protected:
@@ -13,8 +13,8 @@ class RequestParserTest : public ::testing::Test {
         // The parser for the incoming request.
         http::server::request_parser request_parser_;
         http::server::request_parser::result_type result;
-        // The reply to be sent back to the client.
-        http::server::reply reply_;
+        // The response to be sent back to the client.
+        http::server::Response response_;
 };
 
 TEST_F(RequestParserTest, ParseGETRequest) {
