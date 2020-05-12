@@ -30,7 +30,8 @@ class static_request_handler: public request_handler {
         static_request_handler(NginxConfig* config);
         static static_request_handler* Init(NginxConfig* config);
         virtual void handle_request(request& req, reply& rep, const char *data);
-        void default_handle_bad_request(reply& rep);  // TODO (JANE): Jane's 404 Handler will get rid of this
+    private:
+        void default_handle_bad_request(reply& rep);
         std::string get_mime_type(std::string file_name);
         std::unordered_map<std::string, std::string> static_locations_;
 };
