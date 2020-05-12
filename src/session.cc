@@ -66,30 +66,30 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
         if (result == http::server::request_parser::good) {
             std::string client_http_message(request_.fullmessage.begin(), request_.fullmessage.end());
 
-            request_dispatcher_->get_handler(request_.uri)->handle_request(request_, reply_, client_http_message.c_str());
+            response_ = request_dispatcher_->get_handler(request_.uri)->handle_request(request_);
 
             std::string log_client_message = client_http_message;
 
             BOOST_LOG_TRIVIAL(info) << "Parsed request successfully.";
             BOOST_LOG_TRIVIAL(info) << request_.method << " " << request_.uri
             << " HTTP/" << request_.http_version_major << "." <<
-            request_.http_version_minor << " " << reply_.status << " "
+            request_.http_version_minor << " " << response_.status << " "
             << client_http_message.size();
 
           if (request_.keep_alive) {
-              boost::asio::async_write(socket_, reply_.to_buffers(),
+              boost::asio::async_write(socket_, response_.to_buffers(),
                   boost::bind(&session::handle_write, this,
                   boost::asio::placeholders::error));
           } else {
-              boost::asio::async_write(socket_, reply_.to_buffers(),
+              boost::asio::async_write(socket_, response_.to_buffers(),
                   boost::bind(&session::shutdown, this,
                   boost::asio::placeholders::error));
           }
         } else if (result == http::server::request_parser::bad) { // Return a bad request reply if request parser can't parse properly
-            reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
+            response_ = http::server::reply::stock_reply(http::server::reply::bad_request);
             BOOST_LOG_TRIVIAL(error) << "Request is bad. Invalid request,\
  shutting down session.";
-            boost::asio::async_write(socket_, reply_.to_buffers(),
+            boost::asio::async_write(socket_, response_.to_buffers(),
                 boost::bind(&session::shutdown, this,
                 boost::asio::placeholders::error));
         } else {  // Keep on Reading
@@ -129,7 +129,7 @@ void session::shutdown(const boost::system::error_code& error) {
               socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both,
             ignored_ec);
     } else {
-        BOOST_LOG_TRIVIAL(error) << "Error in session shutdown.";
+        BOOST_LOG_TRIVIAL(error) << "Error in session shutdown." << error;
         delete this;
     }
 }

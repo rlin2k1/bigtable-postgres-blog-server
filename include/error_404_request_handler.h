@@ -27,7 +27,7 @@ struct request;
 class error_404_request_handler: public request_handler {
  public:
     static error_404_request_handler* Init(const std::string& location_path, const NginxConfig& config);
-    virtual void handle_request(request& req, reply& rep, const char *data);
+    virtual reply handle_request(const request& request);
 
  private:
     std::string error_path_;

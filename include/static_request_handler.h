@@ -28,10 +28,10 @@ struct request;
 class static_request_handler: public request_handler {
     public: // API uses public functions
         static static_request_handler* Init(const std::string& location_path, const NginxConfig& config);
-        virtual void handle_request(request& req, reply& rep, const char *data);
+        virtual reply handle_request(const request& request);
 
     private:
-        void default_handle_bad_request(reply& rep);
+        void default_bad_request(reply& response);
         std::string get_mime_type(std::string file_name);
         std::string client_location_path_;
         std::string server_root_path_;

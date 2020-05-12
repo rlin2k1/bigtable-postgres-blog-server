@@ -39,7 +39,7 @@ class session {
 
     http::server::request request_;
     http::server::request_parser request_parser_;
-    http::server::reply reply_;
+    http::server::reply response_;
 
     NginxConfig* config_;
     request_dispatcher* request_dispatcher_;

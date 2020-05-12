@@ -29,16 +29,19 @@ namespace server {
         return new error_404_request_handler();
     }
 
-    void error_404_request_handler::handle_request(request& req, reply& rep,  const char *data) {
+    reply error_404_request_handler::handle_request(const request& request) {
         BOOST_LOG_TRIVIAL(info) << "Request not found: 404 error.";
+        reply response;
         // Fill out the reply to be sent to the client.
-        rep.status = reply::not_found;
-        rep.content = http::server::stock_replies::not_found;
-        rep.headers.resize(2);
-        rep.headers[0].name = "Content-Length";
-        rep.headers[0].value = std::to_string(rep.content.size());
-        rep.headers[1].name = "Content-Type";
-        rep.headers[1].value = "text/html";
+        response.status = reply::not_found;
+        response.content = http::server::stock_replies::not_found;
+        response.headers.resize(2);
+        response.headers[0].name = "Content-Length";
+        response.headers[0].value = std::to_string(response.content.size());
+        response.headers[1].name = "Content-Type";
+        response.headers[1].value = "text/html";
+
+        return response;
     }
 }  // namespace server
 }  // namespace http

@@ -49,7 +49,7 @@ void request_dispatcher::create_handler_mapping() {
             }
   	    }
         // ******************************** TEMPLATE FOR NEW HANDLER REGISTRATIONS *******************************
-        // else if (*i == "NEWHandler") { // TODO (newteam): Add a new handler. Your handler may not need an unordered_map to track locations
+        // else if (*i == "NEWHandler") {  // TODO (newteam): Add a new handler. Your handler may not need an unordered_map to track locations
     	//     http::server::request_handler* NEW_handler = http::server::NEW_request_handler::Init(config_);
 
         //     std::unordered_map<std::string, std::string> static_locations = config_.NEW_locations_;???

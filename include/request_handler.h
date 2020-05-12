@@ -40,7 +40,7 @@ class request_handler {
  public:
     // Handle a request and produce a reply
     // Pure virtual function. We need to derive from and then implement this method
-    virtual void handle_request(request& req, reply& rep, const char *data) = 0;
+    virtual reply handle_request(const request& request) = 0;
     // static RequestHandler* Init(const std::string& location_path, const NginxConfig& config);
 };
 

@@ -46,14 +46,14 @@ std::unordered_map<std::string, std::string> mappings(
 
 // Return a Not found reply if there are no echo or
 // static uris that can be handled
-void static_request_handler::default_handle_bad_request(reply& rep) {
-    rep.status = reply::not_found;
-    rep.content = http::server::stock_replies::not_found;
-    rep.headers.resize(2);
-    rep.headers[0].name = "Content-Length";
-    rep.headers[0].value = std::to_string(rep.content.size());
-    rep.headers[1].name = "Content-Type";
-    rep.headers[1].value = "text/html";
+void static_request_handler::default_bad_request(reply& response) {
+    response.status = reply::not_found;
+    response.content = http::server::stock_replies::not_found;
+    response.headers.resize(2);
+    response.headers[0].name = "Content-Length";
+    response.headers[0].value = std::to_string(response.content.size());
+    response.headers[1].name = "Content-Type";
+    response.headers[1].value = "text/html";
 }
 
 // Get mapping of mime type
@@ -68,9 +68,11 @@ std::string static_request_handler::get_mime_type(std::string file_name) {
     return "text/plain";
 }
 
-void static_request_handler::handle_request(request& req, reply& rep,  const char *data) {
+reply static_request_handler::handle_request(const request& request) {
     // Find the root directory and target file from the client's request uri
-    std::string uri = req.uri;
+    reply response;
+
+    std::string uri = request.uri;
     size_t space_index = 0;
     while (true) {
         space_index = uri.find("%20", space_index);
@@ -108,7 +110,7 @@ void static_request_handler::handle_request(request& req, reply& rep,  const cha
     send_file.open(file_name.c_str());
     if (!send_file.good()) {
         BOOST_LOG_TRIVIAL(error) << "Could not open file at path: " << file_name;
-        default_handle_bad_request(rep);
+        default_bad_request(response);
     } else {
         std::vector<char> send_data;
         char c = '\0';
@@ -116,14 +118,15 @@ void static_request_handler::handle_request(request& req, reply& rep,  const cha
             send_data.push_back(c);
         }
         std::string send_data_string(send_data.begin(), send_data.end());
-        rep.status = reply::ok;
-        rep.content = send_data_string;
-        rep.headers.resize(2);
-        rep.headers[0].name = "Content-Length";
-        rep.headers[0].value = std::to_string(rep.content.size());
-        rep.headers[1].name = "Content-Type";
-        rep.headers[1].value = get_mime_type(uri);
+        response.status = reply::ok;
+        response.content = send_data_string;
+        response.headers.resize(2);
+        response.headers[0].name = "Content-Length";
+        response.headers[0].value = std::to_string(response.content.size());
+        response.headers[1].name = "Content-Type";
+        response.headers[1].value = get_mime_type(uri);
     }
+    return response;
 }
 
 }  // namespace server

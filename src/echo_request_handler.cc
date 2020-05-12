@@ -29,16 +29,22 @@ namespace server {
         return erh;
     }
 
-    void echo_request_handler::handle_request(request& req, reply& rep,  const char *data) {
-        BOOST_LOG_TRIVIAL(info) << "Currently serving echo requests on path: " << req.uri;
+    reply echo_request_handler::handle_request(const request& request) {
+        BOOST_LOG_TRIVIAL(info) << "Currently serving echo requests on path: " << request.uri;
+        reply response;
+
+        std::string rf(request.fullmessage.begin(), request.fullmessage.end());
+
         // Fill out the reply to be sent to the client.
-        rep.status = reply::ok;
-        rep.content = data;
-        rep.headers.resize(2);
-        rep.headers[0].name = "Content-Length";
-        rep.headers[0].value = std::to_string(rep.content.size());
-        rep.headers[1].name = "Content-Type";
-        rep.headers[1].value = "text/plain";
+        response.status = reply::ok;
+        response.content = rf;
+        response.headers.resize(2);
+        response.headers[0].name = "Content-Length";
+        response.headers[0].value = std::to_string(response.content.size());
+        response.headers[1].name = "Content-Type";
+        response.headers[1].value = "text/plain";
+
+        return response;
     }
 }  // namespace server
 }  // namespace http
