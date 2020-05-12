@@ -22,8 +22,10 @@ Date Created:
 
 namespace http {
 namespace server {
-    error_404_request_handler* error_404_request_handler::Init(NginxConfig* config) {
-        // NginxConfig is not used for echo requests.
+    error_404_request_handler* error_404_request_handler::Init(const std::string& location_path, const NginxConfig& config) {
+        // NginxConfig is not used for error requests.
+        error_404_request_handler* erh = new error_404_request_handler();
+        erh->error_path_ = location_path;
         return new error_404_request_handler();
     }
 

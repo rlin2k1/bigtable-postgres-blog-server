@@ -22,13 +22,12 @@ using boost::asio::ip::tcp;
 
 class server {
     public:
-        server(boost::asio::io_service& io_service, NginxConfig* config, request_dispatcher* request_dispatcher);
+        server(boost::asio::io_service& io_service, int port_number, request_dispatcher* request_dispatcher);
 
     private:
         void start_accept();
         void handle_accept(session* new_session, const boost::system::error_code& error);
         boost::asio::io_service& io_service_;
         tcp::acceptor acceptor_;
-        NginxConfig* config_;
         request_dispatcher* request_dispatcher_;
 };

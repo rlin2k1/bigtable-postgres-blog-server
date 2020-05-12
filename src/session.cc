@@ -35,7 +35,7 @@ Date Created:
 
 using boost::asio::ip::tcp;
 
-session::session(boost::asio::io_service& io_service, NginxConfig* config, request_dispatcher* request_dispatcher) : socket_(io_service), config_(config), request_dispatcher_(request_dispatcher) {}
+session::session(boost::asio::io_service& io_service, request_dispatcher* request_dispatcher) : socket_(io_service), request_dispatcher_(request_dispatcher) {}
 
 tcp::socket& session::socket() {
     return socket_;
@@ -67,7 +67,6 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
             std::string client_http_message(request_.fullmessage.begin(), request_.fullmessage.end());
 
             request_dispatcher_->get_handler(request_.uri)->handle_request(request_, reply_, client_http_message.c_str());
-            // TODO: Michael needs to change handle_request to return a Reply struct. Only take in Request struct.
 
             std::string log_client_message = client_http_message;
 

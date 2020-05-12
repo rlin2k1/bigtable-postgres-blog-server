@@ -22,9 +22,11 @@ Date Created:
 
 namespace http {
 namespace server {
-    echo_request_handler* echo_request_handler::Init(NginxConfig* config) {
+    echo_request_handler* echo_request_handler::Init(const std::string& location_path, const NginxConfig& config) {
         // NginxConfig is not used for echo requests.
-        return new echo_request_handler();
+        echo_request_handler* erh = new echo_request_handler();
+        erh->echo_path_ = location_path;
+        return erh;
     }
 
     void echo_request_handler::handle_request(request& req, reply& rep,  const char *data) {

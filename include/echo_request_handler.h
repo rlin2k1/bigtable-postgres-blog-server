@@ -25,10 +25,11 @@ struct reply;
 struct request;
 
 class echo_request_handler: public request_handler {
- public:
-    static echo_request_handler* Init(NginxConfig* config);
-
+ public:  // API uses public functions
+    static echo_request_handler* Init(const std::string& location_path, const NginxConfig& config);
     virtual void handle_request(request& req, reply& rep, const char *data);
+ private:
+    std::string echo_path_;
 };
 
 }  // namespace server

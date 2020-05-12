@@ -24,10 +24,11 @@ Date Created:
 namespace http {
 namespace server {
 
-static_request_handler::static_request_handler(NginxConfig* config) : static_locations_(config->static_locations_){}
-
-static_request_handler* static_request_handler::Init(NginxConfig* config) {
-    return new static_request_handler(config);
+static_request_handler* static_request_handler::Init(const std::string& location_path, const NginxConfig& config) {
+    static_request_handler* srh = new static_request_handler();
+    srh -> client_location_path_ = location_path;
+    srh -> server_root_path_ = config.static_locations_.at(location_path);
+    return srh;
 }
 
 std::unordered_map<std::string, std::string> mappings(
@@ -46,10 +47,6 @@ std::unordered_map<std::string, std::string> mappings(
 // Return a Not found reply if there are no echo or
 // static uris that can be handled
 void static_request_handler::default_handle_bad_request(reply& rep) {
-    // TODO(Jane): add a default handle bad request
-    // that can handle various bad requests
-    // TODO(Jane): Is there a way to leave this object and instantiate 
-    // a new bad handler object in request handler?
     rep.status = reply::not_found;
     rep.content = http::server::stock_replies::not_found;
     rep.headers.resize(2);
@@ -91,7 +88,7 @@ void static_request_handler::handle_request(request& req, reply& rep,  const cha
 
     size_t slash_pos = 0;
     while (true) {
-        if (static_locations_.find(client_uri_path) != static_locations_.end()) {
+        if (client_uri_path == client_location_path_) {
             break;
         }
         slash_pos = client_uri_path.find_last_of("/");
@@ -106,7 +103,7 @@ void static_request_handler::handle_request(request& req, reply& rep,  const cha
 
     //--------------------------------------------------------------------------
     // Fill out the reply to be sent to the client.
-    std::string file_name = static_locations_[client_uri_path] + sub_uri_path;
+    std::string file_name = server_root_path_ + sub_uri_path;
     std::ifstream send_file;
     send_file.open(file_name.c_str());
     if (!send_file.good()) {

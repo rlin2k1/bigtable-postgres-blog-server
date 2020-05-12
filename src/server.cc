@@ -39,9 +39,9 @@ namespace attrs = boost::log::attributes;
 
 using boost::asio::ip::tcp;
 
-server::server(boost::asio::io_service& io_service, NginxConfig* config, request_dispatcher* request_dispatcher) :
-                                io_service_(io_service), config_(config), request_dispatcher_(request_dispatcher), acceptor_(io_service,
-                                tcp::endpoint(tcp::v4(), config->port_number)) {
+server::server(boost::asio::io_service& io_service, int port_number, request_dispatcher* request_dispatcher) :
+                                io_service_(io_service), request_dispatcher_(request_dispatcher), acceptor_(io_service,
+                                tcp::endpoint(tcp::v4(), port_number)) {
 
         BOOST_LOG_TRIVIAL(info) << "ProcessID of server is: " << getpid();
 
@@ -49,7 +49,7 @@ server::server(boost::asio::io_service& io_service, NginxConfig* config, request
 }
 
 void server::start_accept() {
-    session* new_session = new session(io_service_, config_, request_dispatcher_);
+    session* new_session = new session(io_service_, request_dispatcher_);
     acceptor_.async_accept(new_session->socket(),
                                                 boost::bind(&server::handle_accept,
                                                 this, new_session,

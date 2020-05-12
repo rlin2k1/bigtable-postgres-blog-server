@@ -24,7 +24,7 @@ Date Created:
 
 class session {
  public:
-    session(boost::asio::io_service& io_service, NginxConfig* config, request_dispatcher* request_dispatcher_);
+    session(boost::asio::io_service& io_service, request_dispatcher* request_dispatcher_);
     boost::asio::ip::tcp::socket& socket();
     void start();
 

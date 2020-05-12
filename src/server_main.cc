@@ -111,9 +111,9 @@ int main(int argc, char* argv[]) {
       return 1;
     }
 
-    request_dispatcher rd(&config);
+    request_dispatcher rd(config);
 
-    server s(io_service, &config, &rd);
+    server s(io_service, config.port_number, &rd);
     BOOST_LOG_TRIVIAL(info) << "Successfully started web server \
 using port number "<< config.port_number;
 
