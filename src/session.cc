@@ -68,6 +68,11 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
 
             response_ = request_dispatcher_->get_handler(request_.uri)->handle_request(request_);
 
+            if (request_dispatcher_->status_handler_enabled){
+                BOOST_LOG_TRIVIAL(info) << "Status handler enabled, recording request.";
+                request_dispatcher_->get_status_handler()->record_received_request(request_.uri, response_.code_);
+            }
+
             std::string log_client_message = client_http_message;
 
             BOOST_LOG_TRIVIAL(info) << "Parsed request successfully.";

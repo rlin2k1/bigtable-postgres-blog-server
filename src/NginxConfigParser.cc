@@ -150,6 +150,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   std::string root_token = "root";
   std::string static_token = "StaticHandler";
   std::string echo_token = "EchoHandler";
+  std::string status_token = "StatusHandler";
 
   std::string location;
   std::unordered_set<std::string> seen_handlers;
@@ -190,6 +191,14 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
         location = location.substr(1, location.size()-2);
         BOOST_LOG_TRIVIAL(info) << "Echo location: " << location;
         config->echo_locations_.insert(location);
+        location = "";
+        seen_location = false;
+        expect_handler_type = false;
+      } else if (token == status_token) {
+        // remove the quotes
+        location = location.substr(1, location.size()-2);
+        BOOST_LOG_TRIVIAL(info) << "Status location: " << location;
+        config->status_locations_.insert(location);
         location = "";
         seen_location = false;
         expect_handler_type = false;

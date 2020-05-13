@@ -20,6 +20,7 @@ Date Created:
 #include "echo_request_handler.h"
 #include "static_request_handler.h"
 #include "error_404_request_handler.h"
+#include "status_request_handler.h"
 
 request_dispatcher::request_dispatcher(const NginxConfig& config): config_(config) {
     create_handler_mapping(); // Initializes the needed request handlers
@@ -46,6 +47,15 @@ void request_dispatcher::create_handler_mapping() {
                 http::server::request_handler* static_handler = http::server::static_request_handler::Init(itr->first, config_);
 
                 dispatcher[itr->first] = static_handler;  // Set static uri path mapping to static handler
+            }
+  	    }
+        else if (*i == "StatusHandler") {
+            std::unordered_set<std::string> status_locations = config_.status_locations_;
+            for (std::unordered_set<std::string>::iterator itr = status_locations.begin(); itr != status_locations.end(); ++itr) {
+                http::server::request_handler* status_handler = http::server::status_request_handler::Init(*itr, config_);
+
+                dispatcher[*itr] = status_handler;  // Set status uri path mapping to echo handler
+                status_handler_enabled = true;
             }
   	    }
         // ******************************** TEMPLATE FOR NEW HANDLER REGISTRATIONS *******************************
@@ -82,7 +92,9 @@ http::server::request_handler* request_dispatcher::get_handler(std::string uri) 
         return dispatcher[uri];
     } else if (static_path != "") {
         return dispatcher[static_path];
-    }  else {
+    } else if (config_.status_locations_.find(uri) != config_.status_locations_.end()) {
+        return dispatcher[uri];
+    } else {
         return error_handler_;
     }
     // ******* TEMPLATE FOR DISPATCHING NEW HANDLERS ********
@@ -90,6 +102,12 @@ http::server::request_handler* request_dispatcher::get_handler(std::string uri) 
     //     return dispatcher[your path]
     // }
     // ******************************************************
+}
+
+http::server::status_request_handler* request_dispatcher::get_status_handler() {
+    http::server::request_handler* status_handler_ptr = dispatcher["/status"];
+    http::server::status_request_handler* casted_ptr = dynamic_cast<http::server::status_request_handler*>(status_handler_ptr);
+    return casted_ptr;
 }
 
 std::string request_dispatcher::longest_prefix_match(std::string uri) {

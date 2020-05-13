@@ -18,12 +18,15 @@ Date Created:
 #include "request_handler.h"
 #include "config_parser.h"
 #include "error_404_request_handler.h"
+#include "status_request_handler.h"
 
 class request_dispatcher {
     public:
         request_dispatcher(const NginxConfig& config);
         void create_handler_mapping();
         http::server::request_handler* get_handler(std::string uri);
+        http::server::status_request_handler* get_status_handler();
+        bool status_handler_enabled = false; 
 
     private:
         const NginxConfig& config_;

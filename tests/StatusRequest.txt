@@ -1,0 +1,31 @@
+HTTP/1.0 200 OK
+Content-Length: 600
+Content-Type: text/plain
+
+Number of requests received: 17
+Received request(s):
+/echo 200
+/static/masked 200
+/static/helloworld.txt 200
+/sta%20tic/helloworld.txt 200
+/static/subdirectory/hello%20world.txt 200
+/static/subdirectory/two%20%20spaces.jpg 200
+/static/nothanks.jpg 200
+/static/subdirectory/helloworld.png 200
+/static/hack.gif 200
+/static/kek.html 200
+/static/zippitydooda.zip 200
+/static/hulkhogan.pdf 200
+/static/nonexistent.txt 404
+/static2939/nonexistentpath.txt 404
+/echo2 200
+/echo 200
+/echo2 200
+EchoHandler(s):
+/static/masked
+/echo
+/echo2
+StaticHandler(s):
+/sta tic
+/static
+/static2

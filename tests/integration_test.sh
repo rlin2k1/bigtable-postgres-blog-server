@@ -38,6 +38,7 @@ keep_alive_request_file="KeepAliveRequest.txt"
 bad_request_file="BadRequest.txt"
 not_found_request_file="NotFoundRequest.txt"
 masked_echo_request_file="MaskedEchoGetRequest.txt"
+status_request_file="StatusRequest.txt"
 
 log_file="sample_0.log"
 nondeterministic_log_file="output.log"
@@ -64,6 +65,9 @@ location \"/static2\" StaticHandler {
 
 location \"/sta tic\" StaticHandler {
   root \"../files\";  # path with a space is also supported
+}
+
+location \"/status\" StatusHandler {
 }
 " > $CONFIG_NAME;
 
@@ -377,7 +381,17 @@ fi
 
 rm $output_file
 #---------------------------------------------------------------------------------------------------
+printf "GET /status HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
+Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
 
+diff $output_file $TEST_DIR/$status_request_file
+
+if [ $? != 0 ]
+then
+    echo "FAILED: GETStatus"
+    kill -9 $WEBSERVER_PID
+    exit 1 # Exit Failure
+fi
 # ---------------------------------------------------------------------------- #
 # Stop the WebServer and Exit
 # ---------------------------------------------------------------------------- #
