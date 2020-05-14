@@ -1,7 +1,5 @@
 # MRJK Server 
 
-# MRJK Server 
-
 ## Code layout
 
 In our main function where the program starts, we use the config parser to parse the config file that is passed as a command line argument when the program is run. From this config file, we extract the port number, the mappings of client locations paths to server base directory paths (for static handlers), and the list of client echo location paths (for echo handlers). The parsed information is stored in an NginxConfig object.
@@ -14,7 +12,7 @@ The echo handler works by taking its request object parameter, taking each of th
 
 Our static handler works by receiving a request object from session, and then parsing the uri to find which file to serve back. The static handler first parses out the client location path from the uri (using the location parameter it was passed in the init function). Then it replaces that with the server side path from the map that it got from the config object (in the init function as well). After constructing this new path, it attempts to open the file on the server side, read the file into a vector of bytes (chars), and then populate a response object, and return that response object back to session.
 
-The status handler returns two pieces of information: 1) a list of all existing handlers and their URL prefixes 2) a list of the number of request received and its respective response code. The list of all handlers is found during the initialization of the status handler, where it takes in a configuration object in its parameter. Status handler references this config object's echo and static locations to create the handler list. The list of all requests received by the webserver is stored with a setter function in the status handler (record_received_request). This setter function is called within session.cc after it has been determined that the parsing of the request was successful, and the corresponding request is handled. This setter function is only called if a flag is enabled that indicates the status handler is enabled. This flag is determined when we create the handler mapping within the request dispatcher using the configuration object. 
+The status handler returns two pieces of information: 1) a list of all existing handlers and their URL prefixes 2) a list of the number of request received and its respective response code. The list of all handlers is found during the initialization of the status handler, where it takes in a configuration object in its parameter. Status handler references this config object's echo and static locations to create the handler list. The list of all requests received by the webserver is stored with a setter function in the status handler (record_received_request). This setter function is called within ./src/session.cc after it has been determined that the parsing of the request was successful, and the corresponding request is handled. This setter function is only called if a flag is enabled that indicates the status handler is enabled. This flag is determined when we create the handler mapping within the request dispatcher using the configuration object. 
 
 If the handler dispatcher cannot map the client's uri to any of our handlers, then it returns the 404 handler, which then returns a default not found response.
 
@@ -25,19 +23,27 @@ Our config file that we use for deployment is called "config" and it is located 
 
 To build the server, cd into the build directory and run:
 
+```
 cmake .. && make [&& make test]
+```
 
 This will produce an executable called "webserver" that you can run inside of the build/bin directory. You will also need to pass a config file as an argument, but you will need to be careful about how you specify the paths in the config file (primarily for static handler), because if you use relative paths, it will be relative to where the executable is. It might be best to just copy that webserver executable to the main mrjk-web-server directory and run it there with your config file that uses "./your/path/here" for the server side base directories in the config file. 
 
 After you get the server started, you can open a new terminal window, and do something like:
 
+```
 printf "GET /your/request/here\r\n\r\n" | nc localhost your_portnum
+```
 
 And you should see the repsonse sent back by our server. The logging output should show up in the terminal window in which you started the server.
 
 Running it this way might seem a little tedious, so we made a script to build and run our server inside a docker container, just like it does on google cloud. This way, you can see the logging of the server in the terminal as well as the actual files being served on the browser.
 
-To run the script, go to the mrjk-web-server directory *outside* of your development environment (this is important so that you can see the server run on your localhost 80). Then run ./local_build_and_run.sh. This will run all the docker build instructions, as well as our tests. Once you begin to see logging output, our server is running. Then navigate to your browser at localhost:80/your/path/here and you should see the response returned by the server. As you make requests to the server, you will also see the log output in the terminal window where you started the server.
+To run the script, go to the mrjk-web-server directory *outside* of your development environment (this is important so that you can see the server run on your machine's localhost 80). Then run 
+```
+./local_build_and_run.sh
+```
+This will run all the docker build instructions, as well as our tests. Once you begin to see logging output, our server is running. Then navigate to your browser at localhost:80/your/path/here and you should see the response returned by the server. As you make requests to the server, you will also see the log output in the terminal window where you started the server.
 
 
 ## Adding Handlers
@@ -46,14 +52,18 @@ To add handlers, the primary files that you will need to change are:
 
 - ./src/request_dispatcher.cc
 - ./include/request_dispatcher.h
-    - The two above files define and implement our request handler dispatcher. You will need to change these files to register your new handler based on the client uri from the request
+    - The two above files define and implement our request handler dispatcher. You will need to change these files to register your new handler based on the client uri from the request. The .cc file has a template/instructions to help get you started.
 - ./CMakeLists.txt
     - You will need to add your new files into this file as libraries so that the server actually picks them up when it's building.
+- (probably) ./src/status_request_handler.cc
+    - If you want the requests to show up in the status report, you will need to add support to this handler for it.
 - (probably) ./tests/integration_test.sh
-    - We found it better and easier to test the more complicated handlers using integration tests instead of 
+    - We found it better and easier to test the more complicated handlers using integration tests instead of unit tests.
 - (maybe) ./config
+    - This is our config file that we use for deployment onto gcloud, so when you finish your code, if it was necessary to add a path to the config file, then you will need to update this file with the final version of the config statement
 - (maybe) ./src/NginxConfigParser.cc
-- (maybe) ./include/config_parser.cc
+    - We get most of the information we need from the config file in the parser, and then transfer that information over to the 
+- (maybe) ./include/config_parser.h
 - plus any files that you add for your handler
 
 Note that the header (.h) files go in the ./include directory, the source files go in the ./src directory, and the test files go in the ./tests directory. 
