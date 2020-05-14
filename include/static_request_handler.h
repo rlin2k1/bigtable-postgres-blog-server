@@ -19,16 +19,11 @@ Date Created:
 
 #include "request_handler.h"
 #include "config_parser.h"
-namespace http {
-namespace server {
-
-class Response;
-struct request;
 
 class static_request_handler: public request_handler {
     public: // API uses public member functions
         static static_request_handler* Init(const std::string& location_path, const NginxConfig& config);
-        virtual Response handle_request(const request& request);
+        virtual Response handle_request(const Request& request);
 
     private:
         void default_bad_request(Response& response);
@@ -36,8 +31,5 @@ class static_request_handler: public request_handler {
         std::string client_location_path_;
         std::string server_root_path_;
 };
-
-}  // namespace server
-}  // namespace http
 
 #endif  // INCLUDE_STATIC_REQUEST_HANDLER_H_

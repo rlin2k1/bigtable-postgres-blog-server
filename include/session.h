@@ -13,12 +13,10 @@ Date Created:
 
 #include <boost/asio.hpp>
 #include <string>
+#include "request_builder.h"
 #include "request.h"
 #include "request_parser.h"
 #include "response.h"
-#include "request_handler.h"
-#include "echo_request_handler.h"
-#include "static_request_handler.h"
 #include "config_parser.h"
 #include "request_dispatcher.h"
 #include "response_helper_library.h"
@@ -33,14 +31,15 @@ class session {
     void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
     void handle_write(const boost::system::error_code& error);
     void shutdown(const boost::system::error_code& error);
+    Request build_request();
     std::string get_entire_request();
     boost::asio::ip::tcp::socket socket_;
     enum { max_length = 1024 };
     char data_[max_length+1];
 
-    http::server::request request_;
-    http::server::request_parser request_parser_;
-    http::server::Response response_;
+    request_builder request_builder_;
+    request_parser request_parser_;
+    Response response_;
 
     NginxConfig* config_;
     request_dispatcher* request_dispatcher_;

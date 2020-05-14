@@ -17,28 +17,18 @@ Date Created:
 #include <string>
 #include "request_handler.h"
 #include "config_parser.h"
-#include "response.h"
-
-namespace http {
-namespace server {
-
-class Response;
-struct request;
 
 class status_request_handler: public request_handler {
  public:  // API uses public functions
     status_request_handler(const NginxConfig& config);
     static status_request_handler* Init(const std::string& location_path, const NginxConfig& config);
     void record_received_request(std::string request_uri, Response::StatusCode response_status);
-    virtual Response handle_request(const request& request);
+    virtual Response handle_request(const Request& request);
  private:
     std::string status_path_;
     std::string handler_list;
     std::string received_request_list;
     int request_counter;
 };
-
-}  // namespace server
-}  // namespace http
 
 #endif  // INCLUDE_STATUS_REQUEST_HANDLER_H_

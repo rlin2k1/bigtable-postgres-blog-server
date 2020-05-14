@@ -13,3 +13,6 @@ location "/static" StaticHandler {
 location "/static2" StaticHandler {
   root "./files";  # second path points to the same directory
 }
+
+location "/status" StatusHandler {
+}

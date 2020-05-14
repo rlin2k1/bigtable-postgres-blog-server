@@ -23,21 +23,13 @@ Date Created:
 
 #include <string>
 
-namespace http {
-namespace server {
-
-struct header
-{
+struct header {
   std::string name;
   std::string value;
 };
 
-inline bool operator==(const header& lhs, const header& rhs)
-{
+inline bool operator==(const header& lhs, const header& rhs) {
     return (lhs.name == rhs.name) && (lhs.value == rhs.value);
 }
-
-} // namespace server
-} // namespace http
 
 #endif // HTTP_HEADER_HPP

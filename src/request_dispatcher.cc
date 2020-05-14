@@ -34,17 +34,16 @@ void request_dispatcher::create_handler_mapping() {
         if (*i == "EchoHandler") {
             std::unordered_set<std::string> echo_locations = config_.echo_locations_;
             for (std::unordered_set<std::string>::iterator itr = echo_locations.begin(); itr != echo_locations.end(); ++itr) {
-                http::server::request_handler* echo_handler = http::server::echo_request_handler::Init(*itr, config_);
+                request_handler* echo_handler = echo_request_handler::Init(*itr, config_);
 
                 dispatcher[*itr] = echo_handler;  // Set echo uri path mapping to echo handler
             }
-
   	    }
   	    else if (*i == "StaticHandler") {
             std::unordered_map<std::string, std::string> static_locations = config_.static_locations_;
 
             for (std::unordered_map<std::string, std::string>::iterator itr = static_locations.begin(); itr != static_locations.end(); ++itr) {
-                http::server::request_handler* static_handler = http::server::static_request_handler::Init(itr->first, config_);
+                request_handler* static_handler = static_request_handler::Init(itr->first, config_);
 
                 dispatcher[itr->first] = static_handler;  // Set static uri path mapping to static handler
             }
@@ -52,7 +51,7 @@ void request_dispatcher::create_handler_mapping() {
         else if (*i == "StatusHandler") {
             std::unordered_set<std::string> status_locations = config_.status_locations_;
             for (std::unordered_set<std::string>::iterator itr = status_locations.begin(); itr != status_locations.end(); ++itr) {
-                http::server::request_handler* status_handler = http::server::status_request_handler::Init(*itr, config_);
+                request_handler* status_handler = status_request_handler::Init(*itr, config_);
 
                 dispatcher[*itr] = status_handler;  // Set status uri path mapping to echo handler
                 status_handler_enabled = true;
@@ -60,7 +59,7 @@ void request_dispatcher::create_handler_mapping() {
   	    }
         // ******************************** TEMPLATE FOR NEW HANDLER REGISTRATIONS *******************************
         // else if (*i == "NEWHandler") {  // TODO (newteam): Add a new handler. Your handler may not need an unordered_map to track locations
-    	//     http::server::request_handler* NEW_handler = http::server::NEW_request_handler::Init(config_);
+    	//     request_handler* NEW_handler = NEW_request_handler::Init(config_);
 
         //     std::unordered_map<std::string, std::string> static_locations = config_.NEW_locations_;???
 
@@ -74,7 +73,7 @@ void request_dispatcher::create_handler_mapping() {
     }
 }
 
-http::server::request_handler* request_dispatcher::get_handler(std::string uri) {
+request_handler* request_dispatcher::get_handler(std::string uri) {
     // Find the root directory and target file from the client's request uri
     size_t space_index = 0;
     while (true) {
@@ -104,9 +103,9 @@ http::server::request_handler* request_dispatcher::get_handler(std::string uri) 
     // ******************************************************
 }
 
-http::server::status_request_handler* request_dispatcher::get_status_handler() {
-    http::server::request_handler* status_handler_ptr = dispatcher["/status"];
-    http::server::status_request_handler* casted_ptr = dynamic_cast<http::server::status_request_handler*>(status_handler_ptr);
+status_request_handler* request_dispatcher::get_status_handler() {
+    request_handler* status_handler_ptr = dispatcher["/status"];
+    status_request_handler* casted_ptr = dynamic_cast<status_request_handler*>(status_handler_ptr);
     return casted_ptr;
 }
 

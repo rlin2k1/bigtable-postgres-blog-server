@@ -24,15 +24,15 @@ class request_dispatcher {
     public:
         request_dispatcher(const NginxConfig& config);
         void create_handler_mapping();
-        http::server::request_handler* get_handler(std::string uri);
-        http::server::status_request_handler* get_status_handler();
+        request_handler* get_handler(std::string uri);
+        status_request_handler* get_status_handler();
         bool status_handler_enabled = false; 
 
     private:
         const NginxConfig& config_;
-        std::unordered_map<std::string, http::server::request_handler*> dispatcher;  // URI to Handler Mapping
+        std::unordered_map<std::string, request_handler*> dispatcher;  // URI to Handler Mapping
         std::string longest_prefix_match(std::string uri);
-        http::server::request_handler* error_handler_ = http::server::error_404_request_handler::Init("error_404", config_);
+        request_handler* error_handler_ = error_404_request_handler::Init("error_404", config_);
 };
 
 #endif  // INCLUDE_REQUEST_DISPATCHER

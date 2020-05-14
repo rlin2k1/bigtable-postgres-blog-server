@@ -18,22 +18,13 @@ Date Created:
 #include "request_handler.h"
 #include "config_parser.h"
 
-namespace http {
-namespace server {
-
-class Response;
-struct request;
-
 class error_404_request_handler: public request_handler {
  public:
     static error_404_request_handler* Init(const std::string& location_path, const NginxConfig& config);
-    virtual Response handle_request(const request& request);
+    virtual Response handle_request(const Request& request);
 
  private:
     std::string error_path_;
 };
-
-}  // namespace server
-}  // namespace http
 
 #endif  // INCLUDE_ERROR_404_REQUEST_HANDLER_H_

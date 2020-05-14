@@ -23,14 +23,11 @@ Date Created:
 
 class ResponseHelperLibrary {
   public:
-    static boost::asio::const_buffer to_buffer(http::server::Response::StatusCode status);
-    static std::vector<boost::asio::const_buffer> to_buffers(http::server::Response& response);
-    static http::server::Response stock_response(http::server::Response::StatusCode status);
-    static std::string to_string(http::server::Response::StatusCode status);
+    static boost::asio::const_buffer to_buffer(Response::StatusCode status);
+    static std::vector<boost::asio::const_buffer> to_buffers(Response& response);
+    static Response stock_response(Response::StatusCode status);
+    static std::string to_string(Response::StatusCode status);
 };
-
-namespace http {
-namespace server {
 
 namespace status_strings {
 
@@ -67,7 +64,7 @@ const std::string bad_gateway =
 const std::string service_unavailable =
   "HTTP/1.0 503 Service Unavailable\r\n";
 
-} // namespace status_strings
+}  // namespace status_strings
 
 namespace stock_responses {
 
@@ -148,10 +145,6 @@ const char service_unavailable[] =
   "<body><h1>503 Service Unavailable</h1></body>"
   "</html>";
 
-} // namespace stock_responses
-
-
-} // namespace server
-} // namespace http
+}  // namespace stock_responses
 
 #endif // HTTP_RESPONSEHELPERLIBRARY_HPP

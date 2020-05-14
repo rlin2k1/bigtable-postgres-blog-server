@@ -16,31 +16,25 @@ Date Created:
 #include <string>
 #include <boost/log/trivial.hpp>
 
-#include "request.h"
-#include "response.h"
 #include "error_404_request_handler.h"
 #include "response_helper_library.h"
 
-namespace http {
-namespace server {
-    error_404_request_handler* error_404_request_handler::Init(const std::string& location_path, const NginxConfig& config) {
-        // NginxConfig is not used for error requests.
-        error_404_request_handler* erh = new error_404_request_handler();
-        erh->error_path_ = location_path;
-        return new error_404_request_handler();
-    }
+error_404_request_handler* error_404_request_handler::Init(const std::string& location_path, const NginxConfig& config) {
+    // NginxConfig is not used for error requests.
+    error_404_request_handler* erh = new error_404_request_handler();
+    erh->error_path_ = location_path;
+    return new error_404_request_handler();
+}
 
-    Response error_404_request_handler::handle_request(const request& request) {
-        BOOST_LOG_TRIVIAL(info) << "Request not found: 404 error.";
-        Response response;
+Response error_404_request_handler::handle_request(const Request& request) {
+    BOOST_LOG_TRIVIAL(info) << "Request not found: 404 error.";
+    Response response;
 
-        // Fill out the Response to be sent to the client.
-        response.code_ = Response::not_found;
-        response.body_ = http::server::stock_responses::not_found;
-        response.headers_["Content-Length"] = std::to_string(response.body_.size());
-        response.headers_["Content-Type"] = "text/html";
+    // Fill out the Response to be sent to the client.
+    response.code_ = Response::not_found;
+    response.body_ = stock_responses::not_found;
+    response.headers_["Content-Length"] = std::to_string(response.body_.size());
+    response.headers_["Content-Type"] = "text/html";
 
-        return response;
-    }
-}  // namespace server
-}  // namespace http
+    return response;
+}

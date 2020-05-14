@@ -39,6 +39,7 @@ bad_request_file="BadRequest.txt"
 not_found_request_file="NotFoundRequest.txt"
 masked_echo_request_file="MaskedEchoGetRequest.txt"
 status_request_file="StatusRequest.txt"
+sorted_response_file="SortedResponse.txt"
 
 log_file="sample_0.log"
 nondeterministic_log_file="output.log"
@@ -84,9 +85,10 @@ sleep 0.5 # Wait for Server to Start Up
 # Run the Tests
 # ---------------------------------------------------------------------------- #
 printf "GET /echo HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
-Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
+Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT | sort > $output_file
 
-diff $output_file $TEST_DIR/$get_request_file
+sort $TEST_DIR/$get_request_file > $sorted_response_file
+diff $output_file $sorted_response_file
 
 if [ $? != 0 ]
 then
@@ -95,20 +97,23 @@ then
     exit 1 # Exit Failure
 fi
 
+rm $sorted_response_file
 rm $output_file
 #---------------------------------------------------------------------------------------------------
 printf "GET /static/masked HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
-Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
+Accept: */*\r\n\r\n" | nc $IP_ADDRESS $PORT | sort > $output_file
 
-diff $output_file $TEST_DIR/$masked_echo_request_file
+sort $TEST_DIR/$masked_echo_request_file > $sorted_response_file
+diff $output_file $sorted_response_file
 
 if [ $? != 0 ]
 then
-    echo "FAILED: GETRequest"
+    echo "FAILED: GETEchoMaskedRequest"
     kill -9 $WEBSERVER_PID
     exit 1 # Exit Failure
 fi
 
+rm $sorted_response_file
 rm $output_file
 #---------------------------------------------------------------------------------------------------
 printf "GET /static/helloworld.txt HTTP/1.1\r\nUser-Agent: nc/0.0.1\r\nHost: 127.0.0.1\r\n\
@@ -286,9 +291,10 @@ User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 \
 text/html,application/xhtml+xml,application/xml;q=0.9,\
 image/webp,image/apng,*/*;q=0.8,application/signed-exchange;\
 v=b3;q=0.9\r\nAccept-Encoding: gzip, deflate\r\nAccept-Language: \
-en-US,en;q=0.9\r\n\r\n" | nc $IP_ADDRESS $PORT > $output_file
+en-US,en;q=0.9\r\n\r\n" | nc $IP_ADDRESS $PORT | sort > $output_file
 
-diff $output_file $TEST_DIR/$post_request_file
+sort $TEST_DIR/$post_request_file > $sorted_response_file
+diff $output_file $sorted_response_file
 
 if [ $? != 0 ]
 then
@@ -297,6 +303,7 @@ then
     exit 1 # Exit Failure
 fi
 
+rm $sorted_response_file
 rm $output_file
 #---------------------------------------------------------------------------------------------------
 printf "POST /echo HTTP/1.0\r\nUser-Agent: Firefox\r\n\
@@ -323,9 +330,10 @@ Content-Length: 1394\r\nHost: 127.1.1.1\r\n\r\nonce upon a time\
 ...............................................................\
 ...............................................................\
 ................................................the end" |\
-nc $IP_ADDRESS $PORT > $output_file
+nc $IP_ADDRESS $PORT | sort > $output_file
 
-diff $output_file $TEST_DIR/$long_body_request_file
+sort $TEST_DIR/$long_body_request_file > $sorted_response_file
+diff $output_file $sorted_response_file
 
 if [ $? != 0 ]
 then
@@ -334,13 +342,15 @@ then
     exit 1 # Exit Failure
 fi
 
+rm $sorted_response_file
 rm $output_file
 #---------------------------------------------------------------------------------------------------
 printf "GET /echo2 HTTP/1.1\r\nConnection: Keep-Alive\r\nUser-Agent: nc/0.0.1\r\n\
 Host: 127.0.0.1\r\nAccept: */*\r\n\r\n" |\
-timeout .3 nc $IP_ADDRESS $PORT > $output_file
+timeout .3 nc $IP_ADDRESS $PORT | sort > $output_file
 
-diff $output_file $TEST_DIR/$keep_alive_request_file
+sort $TEST_DIR/$keep_alive_request_file > $sorted_response_file
+diff $output_file $sorted_response_file
 
 if [ $? != 0 ]
 then
@@ -349,6 +359,7 @@ then
     exit 1 # Exit Failure
 fi
 
+rm $sorted_response_file
 rm $output_file
 #---------------------------------------------------------------------------------------------------
 printf "POST /test/test.php HTTP/1.0\r\nUser-Agent: Firefox\r\n\

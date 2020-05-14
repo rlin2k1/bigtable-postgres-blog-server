@@ -1,12 +1,5 @@
 /* request.h
-Header file for the request struct.
-
-Copyright (c) 2003-2017 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-
-Distributed under the Boost Software License, Version 1.0. (See accompanying
-file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-
-Library Source taken from https://www.boost.org/doc/libs/1_65_1/doc/html/boost_asio/example/cpp11/http/server/request.hpp
+Header file for creating HTTP requests.
 
 Author(s):
     Kubilay Agi
@@ -22,27 +15,29 @@ Date Created:
 #define HTTP_REQUEST_HPP
 
 #include <string>
-#include <vector>
-#include "header.h"
+#include <map>
 
-namespace http {
-namespace server {
+class Request {
+    public:
+        // The HTML method (GET, PUT, POST, etc)
+        enum MethodEnum {
+            GET,
+            POST,
+            DELETE
+        };
+        MethodEnum method_;
 
-/// A request received from a client.
-struct request
-{
-  std::string method;
-  std::string uri;
-  int http_version_major;
-  int http_version_minor;
-  std::vector<header> headers;
-  int bodysize;
-  std::vector<char> body;
-  std::vector<char> fullmessage;
-  bool keep_alive = false;
+        // The path of the request
+        std::string uri_;
+
+        // The HTTP version string as given in the request line, e.g. "HTTP/1.1"
+        std::string version_;
+
+        // A map of header, for convenient lookup ("Content-Type", "Cookie", etc)
+        std::map<std::string, std::string> headers_;
+
+        // The content of the request
+        std::string body_;
 };
-
-} // namespace server
-} //  http
 
 #endif // HTTP_REQUEST_HPP

@@ -58,30 +58,26 @@ void session::start() {
 void session::handle_read(const boost::system::error_code& error, size_t bytes_transferred) {
     if (!error) {
         // Asynchronously writes to the socket_ everything in the buffer.
-        http::server::request_parser::result_type result;
+        request_parser::result_type result;
         std::tie(result, std::ignore) = request_parser_.parse(
-              request_, data_, data_ + bytes_transferred);
+              request_builder_, data_, data_ + bytes_transferred);
 
         BOOST_LOG_TRIVIAL(info) << "Parsing request...";
-        if (result == http::server::request_parser::good) {
-            std::string client_http_message(request_.fullmessage.begin(), request_.fullmessage.end());
-
-            response_ = request_dispatcher_->get_handler(request_.uri)->handle_request(request_);
+        if (result == request_parser::good) {
+            Request req = request_builder_.build_request();
+            response_ = request_dispatcher_->get_handler(req.uri_)->handle_request(req);
 
             if (request_dispatcher_->status_handler_enabled){
                 BOOST_LOG_TRIVIAL(info) << "Status handler enabled, recording request.";
-                request_dispatcher_->get_status_handler()->record_received_request(request_.uri, response_.code_);
+                request_dispatcher_->get_status_handler()->record_received_request(req.uri_, response_.code_);
             }
 
-            std::string log_client_message = client_http_message;
-
             BOOST_LOG_TRIVIAL(info) << "Parsed request successfully.";
-            BOOST_LOG_TRIVIAL(info) << request_.method << " " << request_.uri
-            << " HTTP/" << request_.http_version_major << "." <<
-            request_.http_version_minor << " " << response_.code_ << " "
-            << client_http_message.size();
+            BOOST_LOG_TRIVIAL(info) << req.method_ << " " << req.uri_
+            << req.version_ << " " << response_.code_ << " "
+            << request_builder_.fullmessage.size();
 
-          if (request_.keep_alive) {
+          if (request_builder_.keep_alive) {
               boost::asio::async_write(socket_, ResponseHelperLibrary::to_buffers(response_),
                   boost::bind(&session::handle_write, this,
                   boost::asio::placeholders::error));
@@ -90,8 +86,8 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
                   boost::bind(&session::shutdown, this,
                   boost::asio::placeholders::error));
           }
-        } else if (result == http::server::request_parser::bad) {  // Return a bad request Response if request parser can't parse properly
-            response_ = ResponseHelperLibrary::stock_response(http::server::Response::bad_request);
+        } else if (result == request_parser::bad) {  // Return a bad request Response if request parser can't parse properly
+            response_ = ResponseHelperLibrary::stock_response(Response::bad_request);
             BOOST_LOG_TRIVIAL(error) << "Request is bad. Invalid request,\
  shutting down session.";
             boost::asio::async_write(socket_, ResponseHelperLibrary::to_buffers(response_),

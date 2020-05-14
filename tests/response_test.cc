@@ -12,7 +12,7 @@ class ResponseTest : public ::testing::Test {
  protected:
 
         // The response to be sent back to the client.
-        http::server::Response response_;
+        Response response_;
         // Buffer which holds the status string.
         boost::asio::const_buffer const_buffer_;
         // Size of status string buffer.
@@ -23,7 +23,7 @@ class ResponseTest : public ::testing::Test {
 
 TEST_F(ResponseTest, ToBufferOKReply) {
 
-	const_buffer_ = ResponseHelperLibrary::to_buffer(http::server::Response::ok);
+	const_buffer_ = ResponseHelperLibrary::to_buffer(Response::ok);
 	const_buffer_size_ = boost::asio::buffer_size(const_buffer_);
 	std::string check_status_string_(boost::asio::buffer_cast<const char*>(const_buffer_));
 	EXPECT_EQ(check_status_string_, "HTTP/1.0 200 OK\r\n");
@@ -31,7 +31,7 @@ TEST_F(ResponseTest, ToBufferOKReply) {
 
 TEST_F(ResponseTest, ToBufferBADReply) {
 
-	const_buffer_ = ResponseHelperLibrary::to_buffer(http::server::Response::bad_request);
+	const_buffer_ = ResponseHelperLibrary::to_buffer(Response::bad_request);
 	const_buffer_size_ = boost::asio::buffer_size(const_buffer_);
 	std::string check_status_string_(boost::asio::buffer_cast<const char*>(const_buffer_));
 	EXPECT_EQ(check_status_string_, "HTTP/1.0 400 Bad Request\r\n");
@@ -39,7 +39,7 @@ TEST_F(ResponseTest, ToBufferBADReply) {
 
 TEST_F(ResponseTest, ToBufferOtherReply) {
 
-	const_buffer_ = ResponseHelperLibrary::to_buffer(http::server::Response::not_implemented);
+	const_buffer_ = ResponseHelperLibrary::to_buffer(Response::not_implemented);
 	const_buffer_size_ = boost::asio::buffer_size(const_buffer_);
 	std::string check_status_string_(boost::asio::buffer_cast<const char*>(const_buffer_));
 	EXPECT_EQ(check_status_string_, "HTTP/1.0 400 Bad Request\r\n");
@@ -47,7 +47,7 @@ TEST_F(ResponseTest, ToBufferOtherReply) {
 
 TEST_F(ResponseTest, ReplyToBuffersTest) {
 
-	response_.code_ = http::server::Response::StatusCode::ok;
+	response_.code_ = Response::StatusCode::ok;
 	response_.headers_["Content-Length"] = "0";
 	response_.headers_["Host"] = "127.1.1.1";
 	response_.headers_["User-Agent"] = "Firefox";
@@ -70,8 +70,8 @@ TEST_F(ResponseTest, ReplyToBuffersTest) {
 
 TEST_F(ResponseTest, StockRepliesToStringOtherRequest) {
 
-	response_ = ResponseHelperLibrary::stock_response(http::server::Response::not_implemented);
-    EXPECT_EQ(response_.code_, http::server::Response::not_implemented);
+	response_ = ResponseHelperLibrary::stock_response(Response::not_implemented);
+    EXPECT_EQ(response_.code_, Response::not_implemented);
     const char bad_request[] =
     "<html>"
     "<head><title>Bad Request</title></head>"

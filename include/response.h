@@ -26,18 +26,12 @@ Date Created:
 #include <vector>
 #include <map>
 
-
-namespace http {
-namespace server {
-
 /// A Response to be sent to a client.
-class Response
-{
+class Response {
   public:
     // An HTML code indicating success/failure of processing
     /// The status of the Response.
-    enum StatusCode
-    {
+    enum StatusCode {
       ok = 200,
       created = 201,
       accepted = 202,
@@ -62,8 +56,5 @@ class Response
     // The content of the response
     std::string body_;
 };
-
-} // namespace server
-} // namespace http
 
 #endif // HTTP_RESPONSE_HPP

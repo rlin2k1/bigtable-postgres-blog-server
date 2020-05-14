@@ -17,13 +17,8 @@ Date Created:
 #include <boost/algorithm/string.hpp>
 #include <boost/log/trivial.hpp>
 
-#include "request.h"
-#include "response.h"
 #include "static_request_handler.h"
 #include "response_helper_library.h"
-
-namespace http {
-namespace server {
 
 static_request_handler* static_request_handler::Init(const std::string& location_path, const NginxConfig& config) {
     static_request_handler* srh = new static_request_handler();
@@ -49,7 +44,7 @@ std::unordered_map<std::string, std::string> mappings(
 // static uris that can be handled
 void static_request_handler::default_bad_request(Response& response) {
     response.code_ = Response::not_found;
-    response.body_ = http::server::stock_responses::not_found;
+    response.body_ = stock_responses::not_found;
     response.headers_["Content-Length"] = std::to_string(response.body_.size());
     response.headers_["Content-Type"] = "text/html";
 }
@@ -66,11 +61,11 @@ std::string static_request_handler::get_mime_type(std::string file_name) {
     return "text/plain";
 }
 
-Response static_request_handler::handle_request(const request& request) {
+Response static_request_handler::handle_request(const Request& request) {
     // Find the root directory and target file from the client's request uri
     Response response;
 
-    std::string uri = request.uri;
+    std::string uri = request.uri_;
     size_t space_index = 0;
     while (true) {
         space_index = uri.find("%20", space_index);
@@ -123,6 +118,3 @@ Response static_request_handler::handle_request(const request& request) {
     }
     return response;
 }
-
-}  // namespace server
-}  // namespace http
