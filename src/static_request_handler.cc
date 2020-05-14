@@ -1,5 +1,6 @@
 /* static_request_handler.cc
-Request handler to serve static asset responses.
+Description:
+    Request handler to serve static asset responses.
 
 Author(s):
     Kubilay Agi
@@ -20,6 +21,14 @@ Date Created:
 #include "static_request_handler.h"
 #include "response_helper_library.h"
 
+/* static_request_handler* Init(const std::string& location_path, const NginxConfig& config)
+Parameter(s):
+    - location_path: path provided in config file which corresponds to handler
+    - config: parsed representation of configuration file (see config_parser.h)
+Returns:
+    - Pointer to a static_request_handler object.
+Description: 
+    - Uses values provided in the function's parameter to initialize a static_request_handler object */
 static_request_handler* static_request_handler::Init(const std::string& location_path, const NginxConfig& config) {
     static_request_handler* srh = new static_request_handler();
     srh -> client_location_path_ = location_path;
@@ -27,6 +36,7 @@ static_request_handler* static_request_handler::Init(const std::string& location
     return srh;
 }
 
+/* Mapping from file extension to mime type */
 std::unordered_map<std::string, std::string> mappings(
 {
     { "gif", "image/gif" },
@@ -40,8 +50,14 @@ std::unordered_map<std::string, std::string> mappings(
     { "pdf", "application/pdf" }
 });
 
-// Return a Not found Response if there are no echo or
-// static uris that can be handled
+/*  void static_request_handler::default_bad_request(Response& response)
+Parameter(s):
+    - response: Response object (see response.h)
+Returns:
+    - N/A
+Description: 
+    - Returns a not found response, called when a file is unable to be opened
+    at file path by static handler. */
 void static_request_handler::default_bad_request(Response& response) {
     response.code_ = Response::not_found;
     response.body_ = stock_responses::not_found;
@@ -49,7 +65,14 @@ void static_request_handler::default_bad_request(Response& response) {
     response.headers_["Content-Type"] = "text/html";
 }
 
-// Get mapping of mime type
+/*  std::string static_request_handler::get_mime_type(std::string file_name)
+Parameter(s):
+    - file_name: name of file requested to be returned.
+Returns:
+    - Mime type that goes with the file name.
+Description: 
+    - Looks at the file extension of file_name, returns string value
+    to be used for Content-Type */
 std::string static_request_handler::get_mime_type(std::string file_name) {
     size_t last_dot_index = file_name.find_last_of(".");
     if (last_dot_index != std::string::npos) {
@@ -61,6 +84,14 @@ std::string static_request_handler::get_mime_type(std::string file_name) {
     return "text/plain";
 }
 
+/*  Response static_request_handler::handle_request(const request& request)
+Parameter(s):
+    - request: Request object (see request.h)
+Returns:
+    - Response object (see response.h)
+Description: 
+    - Handler uses request URI to find mapping of client path to server path.
+    Once path is found, file is opened and served back to client. */
 Response static_request_handler::handle_request(const Request& request) {
     // Find the root directory and target file from the client's request uri
     Response response;

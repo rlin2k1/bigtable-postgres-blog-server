@@ -44,21 +44,21 @@ namespace expr = boost::log::expressions;
 namespace sinks = boost::log::sinks;
 namespace keywords = boost::log::keywords;
 
+/* Initializes logger and sets other formatting, 
+filtering, and file rotating information */
 void logging_init() {
   logging::register_simple_formatter_factory
     < logging::trivial::severity_level, char >("Severity");
 
   logging::add_file_log(
-    // TODO(janejiwonlee): See if file name pattern
-    // needs to have specific naming convention.
     keywords::file_name = "sample_%N.log",
     // Log entries get written to immediately.
     keywords::auto_flush = true,
     // Files rotated every 10MB.
-    // TODO(janejiwonlee): Add testing.
+    // TODO: Add testing.
     keywords::rotation_size = 10 * 1024 * 1024,
     // Files rotated at midnight.
-    // TODO(janejiwonlee): Add testing.
+    // TODO: Add testing.
     keywords::time_based_rotation = sinks::file::
       rotation_at_time_point(0, 0, 0),
     keywords::format = "%TimeStamp% | %ThreadID% | %Severity% | %Message%");

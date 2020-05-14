@@ -1,5 +1,6 @@
 /* echo_request_handler.cc
-Request handler to serve echo responses.
+Description:
+    Request handler that serves responses to echo requests.
 
 Author(s):
     Kubilay Agi
@@ -20,6 +21,14 @@ Date Created:
 #include "response.h"
 #include "echo_request_handler.h"
 
+/* echo_request_handler* Init(const std::string& location_path, const NginxConfig& config)
+Parameter(s):
+    - location_path: path provided in config file which corresponds to handler
+    - config: parsed representation of configuration file (see config_parser.h)
+Returns:
+    - Pointer to a echo_request_handler object.
+Description: 
+    - Uses values provided in the function's parameter to initialize a echo_request_handler object */
 echo_request_handler* echo_request_handler::Init(const std::string& location_path, const NginxConfig& config) {
     // NginxConfig is not used for echo requests.
     echo_request_handler* erh = new echo_request_handler();
@@ -27,6 +36,13 @@ echo_request_handler* echo_request_handler::Init(const std::string& location_pat
     return erh;
 }
 
+/*  std::string echo_request_handler::build_request_string(const Request& request)
+Parameter(s):
+    - request: Request object (see request.h)
+Returns:
+    - string that formats the request body.
+Description: 
+    - Echo request is reformatted to be returned as a response body. */
 std::string echo_request_handler::build_request_string(const Request& request) {
     std::string request_string;
     if (request.method_ == Request::MethodEnum::GET) {
@@ -51,6 +67,13 @@ std::string echo_request_handler::build_request_string(const Request& request) {
     return request_string;
 }
 
+/*  Response echo_request_handler::handle_request(const request& request)
+Parameter(s):
+    - request: Request object (see request.h)
+Returns:
+    - Response object (see response.h)
+Description: 
+    - Response object is generated and returned, using the request message as the response body. */
 Response echo_request_handler::handle_request(const Request& request) {
     BOOST_LOG_TRIVIAL(info) << "Currently serving echo requests on path: " << request.uri_;
     Response response;

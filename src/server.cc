@@ -48,6 +48,7 @@ server::server(boost::asio::io_service& io_service, int port_number, request_dis
         start_accept();
 }
 
+//  Accepts new session created.
 void server::start_accept() {
     session* new_session = new session(io_service_, request_dispatcher_);
     acceptor_.async_accept(new_session->socket(),
@@ -56,7 +57,7 @@ void server::start_accept() {
                                                 boost::asio::placeholders::error));
 }
 
-//  Creates new session for the user
+//  Creates new session for the user.
 void server::handle_accept(session* new_session, const boost::system::error_code& error) {
         if (!error)	{
                 boost::system::error_code ec;

@@ -1,5 +1,6 @@
 /* error_404_request_handler.cc
-Request handler to for 404 errors.
+Description:
+    Request handler for request types that were unable to be found.
 
 Author(s):
     Kubilay Agi
@@ -19,6 +20,14 @@ Date Created:
 #include "error_404_request_handler.h"
 #include "response_helper_library.h"
 
+/* error_404_request_handler* Init(const std::string& location_path, const NginxConfig& config)
+Parameter(s):
+    - location_path: path provided in config file which corresponds to handler
+    - config: parsed representation of configuration file (see config_parser.h)
+Returns:
+    - Pointer to a error_404_request_handler object.
+Description: 
+    - Uses values provided in the function's parameter to initialize a error_404_request_handler object */
 error_404_request_handler* error_404_request_handler::Init(const std::string& location_path, const NginxConfig& config) {
     // NginxConfig is not used for error requests.
     error_404_request_handler* erh = new error_404_request_handler();
@@ -26,6 +35,14 @@ error_404_request_handler* error_404_request_handler::Init(const std::string& lo
     return new error_404_request_handler();
 }
 
+/*  Response error_404_request_handler::handle_request(const request& request)
+Parameter(s):
+    - request: Request object (see request.h)
+Returns:
+    - Response object (see response.h)
+Description: 
+    - Response object is generated and returned, with generic stock response 
+    in body and corresponding response code. */
 Response error_404_request_handler::handle_request(const Request& request) {
     BOOST_LOG_TRIVIAL(info) << "Request not found: 404 error.";
     Response response;

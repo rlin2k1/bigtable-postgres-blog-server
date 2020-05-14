@@ -1,5 +1,7 @@
 /* request_dispatcher.cc
-Dispatches requests based on URI.
+Description:
+    Initializes and dispatches requests based on
+    URI from configuration information.
 
 Author(s):
     Kubilay Agi
@@ -22,10 +24,22 @@ Date Created:
 #include "error_404_request_handler.h"
 #include "status_request_handler.h"
 
+/* request_dispatcher Constructor
+Parameter(s):
+    - config: parsed representation of configuration file (see config_parser.h)
+Description: 
+    - Calls function which initializes handlers corresponding to those specified in the config. */
 request_dispatcher::request_dispatcher(const NginxConfig& config): config_(config) {
     create_handler_mapping(); // Initializes the needed request handlers
 }
 
+/* void request_dispatcher::create_handler_mapping()
+Parameter(s):
+    - N/A
+Returns:
+    - N/A
+Description: 
+    - References information from config member variable to initialize various handler types. */
 void request_dispatcher::create_handler_mapping() {
     std::vector<std::string> handler_types = config_.handler_types_;
 
@@ -73,6 +87,13 @@ void request_dispatcher::create_handler_mapping() {
     }
 }
 
+/* request_handler* request_dispatcher::get_handler(std::string uri) 
+Parameter(s):
+    - uri: URI given for a request handler in the config. 
+Returns:
+    - Base class pointer to corresponding handler type.
+Description: 
+    - Returns base class pointer with handler respective to URI provided. */
 request_handler* request_dispatcher::get_handler(std::string uri) {
     // Find the root directory and target file from the client's request uri
     size_t space_index = 0;
@@ -103,12 +124,27 @@ request_handler* request_dispatcher::get_handler(std::string uri) {
     // ******************************************************
 }
 
+/* request_handler* request_dispatcher::get_handler(std::string uri) 
+Parameter(s):
+    - N/A
+Returns:
+    - Pointer specific to status_request_handler type.
+Description: 
+    - Returns a pointer to status handler. Used when session.cc needs to record 
+    requests that the server has received. */
 status_request_handler* request_dispatcher::get_status_handler() {
     request_handler* status_handler_ptr = dispatcher["/status"];
     status_request_handler* casted_ptr = dynamic_cast<status_request_handler*>(status_handler_ptr);
     return casted_ptr;
 }
 
+/* std::string request_dispatcher::longest_prefix_match(std::string uri)
+Parameter(s):
+    - uri: String that stores URI for static_request_handler.
+Returns:
+    - Trimmed URI string to use to retrieve the correct static handler.
+Description: 
+    - Helper function to retrieve the URI for static handler. */
 std::string request_dispatcher::longest_prefix_match(std::string uri) {
     size_t slash_pos = 0;
     std::string trimmed_uri = uri;

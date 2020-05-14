@@ -55,6 +55,7 @@ void session::start() {
     */
 }
 
+/* Read and parses requests recieved, and if success, provided response for handle_write to read. */
 void session::handle_read(const boost::system::error_code& error, size_t bytes_transferred) {
     if (!error) {
         // Asynchronously writes to the socket_ everything in the buffer.
@@ -107,6 +108,7 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
     }
 }
 
+/* Writes data from handle_read to the buffer. */
 void session::handle_write(const boost::system::error_code& error) {
     if (!error) {
         // Asynchronously reads data FROM the stream socket TO the buffer

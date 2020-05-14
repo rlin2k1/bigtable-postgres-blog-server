@@ -1,5 +1,6 @@
 /* request_parser.cc
-Parser for Client HTTP requests to the server.
+Description:
+    Parser for Client HTTP requests to the server.
 
 Copyright (c) 2003-2017 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 
@@ -25,6 +26,7 @@ Date Created:
 #include "request_parser.h"
 #include "iostream"
 
+/* Constructor */
 request_parser::request_parser()
   : state_(method_start), contentsize_(0)
 {}
@@ -33,6 +35,15 @@ void request_parser::reset() {
   state_ = method_start;
 }
 
+/* NOTE: Function is called in request_parser.h */
+/* std::string request_dispatcher::longest_prefix_match(std::string uri)
+Parameter(s):
+    - req: Request builder object which stores values from the HTTP request.
+    - input: 
+Returns:
+    - Result type which determines if the request is either good, bad, or indeterminate.
+Description: 
+    - Parses received request to determine if it is syntactically valid. */
 request_parser::result_type request_parser::consume(request_builder& req, char input) {
   req.fullmessage.push_back(input);
   switch (state_) {
@@ -242,6 +253,8 @@ request_parser::result_type request_parser::consume(request_builder& req, char i
   }
 }
 
+/* Functions below allow the request parser to easily distinguish
+   character types and which are considered valid in HTTP requests. */
 bool request_parser::is_char(int c) {
   return c >= 0 && c <= 127;
 }
