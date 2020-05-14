@@ -14,7 +14,7 @@ The echo handler works by taking its request object parameter, taking each of th
 
 Our static handler works by receiving a request object from session, and then parsing the uri to find which file to serve back. The static handler first parses out the client location path from the uri (using the location parameter it was passed in the init function). Then it replaces that with the server side path from the map that it got from the config object (in the init function as well). After constructing this new path, it attempts to open the file on the server side, read the file into a vector of bytes (chars), and then populate a response object, and return that response object back to session.
 
-The status handler works by ....TODO....
+The status handler returns two pieces of information: 1) a list of all existing handlers and their URL prefixes 2) a list of the number of request received and its respective response code. The list of all handlers is found during the initialization of the status handler, where it takes in a configuration object in its parameter. Status handler references this config object's echo and static locations to create the handler list. The list of all requests received by the webserver is stored with a setter function in the status handler (record_received_request). This setter function is called within session.cc after it has been determined that the parsing of the request was successful, and the corresponding request is handled. This setter function is only called if a flag is enabled that indicates the status handler is enabled. This flag is determined when we create the handler mapping within the request dispatcher using the configuration object. 
 
 If the handler dispatcher cannot map the client's uri to any of our handlers, then it returns the 404 handler, which then returns a default not found response.
 
@@ -57,3 +57,12 @@ To add handlers, the primary files that you will need to change are:
 - plus any files that you add for your handler
 
 Note that the header (.h) files go in the ./include directory, the source files go in the ./src directory, and the test files go in the ./tests directory. 
+
+## Group Contact Information
+
+In the event where our webserver does not run as expected or you run into difficulties after thoroughly reading this file and documentation, feel free contact any of the team members below:
+
+Kubilay Agi: <kubilayagi@g.ucla.edu>
+Michael Gee: <mkgee@g.ucla.edu>
+Jane Lee: <janejiwonlee@g.ucla.edu>
+Roy Lin: <rlin2k1@g.ucla.edu>
