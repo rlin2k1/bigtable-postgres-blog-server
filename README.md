@@ -68,6 +68,19 @@ To add handlers, the primary files that you will need to change are:
 
 Note that the header (.h) files go in the ./include directory, the source files go in the ./src directory, and the test files go in the ./tests directory. 
 
+## Linting for our project. 
+
+For our linter, we decided to use CPPLint within VSCode because it enforces the Google C++ Style Guide. The instructions online says to run on your command line: 
+```
+sudo pip install cpplint
+```
+and install the cpplint extension within vscode. 
+
+Few teammates had issues with running the following instructions above and needed to do the following in addition to the commands above. 
+Open the terminal and run which cpplint and copy the path given. 
+Go within VSCode and go to Code > Preferences > Settings 
+Then go to Extensions > cpplint and changed the path within here to the path from the command which cpplint. 
+
 ## Group Contact Information
 
 In the event where our webserver does not run as expected or you run into difficulties after thoroughly reading this file and documentation, feel free contact any of the team members below:
