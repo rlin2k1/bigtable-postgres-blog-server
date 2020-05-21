@@ -19,6 +19,7 @@ Date Created:
 #include "config_parser.h"
 #include "error_404_request_handler.h"
 #include "status_request_handler.h"
+#include "proxy_request_handler.h"
 
 class request_dispatcher {
     public:

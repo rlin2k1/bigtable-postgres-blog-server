@@ -23,11 +23,12 @@ Date Created:
 #include "static_request_handler.h"
 #include "error_404_request_handler.h"
 #include "status_request_handler.h"
+#include "proxy_request_handler.h"
 
 /* request_dispatcher Constructor
 Parameter(s):
     - config: parsed representation of configuration file (see config_parser.h)
-Description: 
+Description:
     - Calls function which initializes handlers corresponding to those specified in the config. */
 request_dispatcher::request_dispatcher(const NginxConfig& config): config_(config) {
     create_handler_mapping(); // Initializes the needed request handlers
@@ -38,7 +39,7 @@ Parameter(s):
     - N/A
 Returns:
     - N/A
-Description: 
+Description:
     - References information from config member variable to initialize various handler types. */
 void request_dispatcher::create_handler_mapping() {
     std::vector<std::string> handler_types = config_.handler_types_;
@@ -70,7 +71,14 @@ void request_dispatcher::create_handler_mapping() {
                 dispatcher[*itr] = status_handler;  // Set status uri path mapping to echo handler
                 status_handler_enabled = true;
             }
-  	    }
+        } else if (*i == "ProxyHandler") {
+          std::unordered_set<std::string> proxy_locations = config_.proxy_locations_;
+          for (std::unordered_set<std::string>::iterator itr = proxy_locations.begin(); itr != proxy_locations.end(); ++itr) {
+            request_handler* proxy_handler = proxy_request_handler::Init(*itr, config_);
+
+            dispatcher[*itr] = proxy_handler;  // Set proxy uri path mapping to proxy handler
+          }
+        }
         // ******************************** TEMPLATE FOR NEW HANDLER REGISTRATIONS *******************************
         // else if (*i == "NEWHandler") {  // TODO (newteam): Add a new handler. Your handler may not need an unordered_map to track locations
     	//     request_handler* NEW_handler = NEW_request_handler::Init(config_);
@@ -87,12 +95,12 @@ void request_dispatcher::create_handler_mapping() {
     }
 }
 
-/* request_handler* request_dispatcher::get_handler(std::string uri) 
+/* request_handler* request_dispatcher::get_handler(std::string uri)
 Parameter(s):
-    - uri: URI given for a request handler in the config. 
+    - uri: URI given for a request handler in the config.
 Returns:
     - Base class pointer to corresponding handler type.
-Description: 
+Description:
     - Returns base class pointer with handler respective to URI provided. */
 request_handler* request_dispatcher::get_handler(std::string uri) {
     // Find the root directory and target file from the client's request uri
@@ -124,13 +132,13 @@ request_handler* request_dispatcher::get_handler(std::string uri) {
     // ******************************************************
 }
 
-/* request_handler* request_dispatcher::get_handler(std::string uri) 
+/* request_handler* request_dispatcher::get_handler(std::string uri)
 Parameter(s):
     - N/A
 Returns:
     - Pointer specific to status_request_handler type.
-Description: 
-    - Returns a pointer to status handler. Used when session.cc needs to record 
+Description:
+    - Returns a pointer to status handler. Used when session.cc needs to record
     requests that the server has received. */
 status_request_handler* request_dispatcher::get_status_handler() {
     request_handler* status_handler_ptr = dispatcher["/status"];
@@ -143,7 +151,7 @@ Parameter(s):
     - uri: String that stores URI for static_request_handler.
 Returns:
     - Trimmed URI string to use to retrieve the correct static handler.
-Description: 
+Description:
     - Helper function to retrieve the URI for static handler. */
 std::string request_dispatcher::longest_prefix_match(std::string uri) {
     size_t slash_pos = 0;

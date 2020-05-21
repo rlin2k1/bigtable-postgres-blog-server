@@ -57,10 +57,10 @@ const char* NginxConfigParser::TokenTypeAsString(TokenType type) {
 /* NginxConfigParser::TokenType NginxConfigParser::ParseToken(std::istream* input, std::string* value)
   Parameter(s):
     - input: Input stream, coming from the configuration file.
-    - value: Stores the value of the current token being parsed. 
+    - value: Stores the value of the current token being parsed.
   Returns:
     - Enum TokenType which helps determine the state of the parser. (See onfig_parser.h for enum info)
-  Description: 
+  Description:
     - Parses configuration file character by character, and equates it with a state. */
 NginxConfigParser::TokenType NginxConfigParser::ParseToken(std::istream* input,
                                                            std::string* value) {
@@ -145,11 +145,11 @@ NginxConfigParser::TokenType NginxConfigParser::ParseToken(std::istream* input,
 /* bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config)
   Parameter(s):
     - config_file: Input stream, coming from the configuration file.
-    - config: Parsed representation of configuration file (see config_parser.h). Stores the 
+    - config: Parsed representation of configuration file (see config_parser.h). Stores the
     resulting parsed information.
   Returns:
     - bool which indicates whether the config file syntax was correct and parse was successful.
-  Description: 
+  Description:
     - Parses configuration file and catches illogical syntax, stores location path and
     more configuration values into the config object.  */
 bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
@@ -170,6 +170,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   std::string static_token = "StaticHandler";
   std::string echo_token = "EchoHandler";
   std::string status_token = "StatusHandler";
+  std::string proxy_token = "ProxyHandler";
 
   std::string location;
   std::unordered_set<std::string> seen_handlers;
@@ -218,6 +219,14 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
         location = location.substr(1, location.size()-2);
         BOOST_LOG_TRIVIAL(info) << "Status location: " << location;
         config->status_locations_.insert(location);
+        location = "";
+        seen_location = false;
+        expect_handler_type = false;
+      } else if (token == proxy_token) {
+        // remove the quotes
+        location = location.substr(1, location.size()-2);
+        BOOST_LOG_TRIVIAL(info) << "Proxy location: " << location;
+        config->proxy_locations_.insert(location);
         location = "";
         seen_location = false;
         expect_handler_type = false;
@@ -314,15 +323,15 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   return false;
 }
 
-/* bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) 
+/* bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config)
   Parameter(s):
     - file_name: Path to configuration file.
-    - config: Parsed representation of configuration file (see config_parser.h). Stores the 
+    - config: Parsed representation of configuration file (see config_parser.h). Stores the
     resulting parsed information.
   Returns:
     - bool which indicates whether the config file syntax was correct and parse was successful.
-  Description: 
-    - Checks to see if the configuration file is able to be opened. If so, passes to 
+  Description:
+    - Checks to see if the configuration file is able to be opened. If so, passes to
     overloaded Parse function (above) which does the actual logical parsing.  */
 bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
   std::ifstream config_file;
@@ -342,11 +351,11 @@ bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
 /* void NginxConfigParser::SetConfigPortNumberFromToken(std::string port_token, NginxConfig* config)
   Parameter(s):
     - port_token: Token which contains port value (found from parsing)
-    - config: Parsed representation of configuration file (see config_parser.h). Stores the 
+    - config: Parsed representation of configuration file (see config_parser.h). Stores the
     resulting parsed information.
   Returns:
     - N/A
-  Description: 
+  Description:
     - Checks to see if the port value provided in config is valid.  */
 void NginxConfigParser::SetConfigPortNumberFromToken(std::string port_token, NginxConfig* config) {
   try {
