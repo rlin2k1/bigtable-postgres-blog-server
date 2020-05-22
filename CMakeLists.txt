@@ -57,6 +57,7 @@ gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE
 gtest_discover_tests(request_parser_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(response_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 add_test(NAME integration_test COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration_test.sh)
+add_test(NAME multithreading_test COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/tests/multithreading_test.py)
 
 # Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
