@@ -31,7 +31,7 @@ status_request_handler::status_request_handler(const NginxConfig& config) {
     // Initializing list of handlers from config file.
     std::unordered_set<std::string> echo_locations = config.echo_locations_;
     std::unordered_map<std::string, std::string> static_locations = config.static_locations_;
-    std::unordered_set<std::string> proxy_locations = config.proxy_locations_;
+    std::unordered_map<std::string, std::pair<std::string, int>> proxy_locations = config.proxy_locations_;
     std::string config_handlers = "";
     if (!(echo_locations).empty()) {
         config_handlers += "EchoHandler(s):\r\n";
@@ -49,8 +49,8 @@ status_request_handler::status_request_handler(const NginxConfig& config) {
     }
     if (!(proxy_locations).empty()) {
         config_handlers += "ProxyHandler(s):\r\n";
-        for (std::unordered_set<std::string>::iterator itr = proxy_locations.begin(); itr != proxy_locations.end(); ++itr) {
-            config_handlers += (*itr);
+        for (std::unordered_map<std::string, std::pair<std::string, int>>::iterator itr = proxy_locations.begin(); itr != proxy_locations.end(); ++itr) {
+            config_handlers += (itr->first);
             config_handlers += "\r\n";
         }
     }

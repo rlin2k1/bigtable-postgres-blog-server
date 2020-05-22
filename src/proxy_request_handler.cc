@@ -29,6 +29,9 @@ Description:
     - Uses values provided in the function's parameter to initialize a proxy_request_handler object */
 proxy_request_handler* proxy_request_handler::Init(const std::string& location_path, const NginxConfig& config) {
     proxy_request_handler* prh = new proxy_request_handler();
+    prh -> client_location_path_ = location_path;
+    prh -> server_location_path_ = config.proxy_locations_.at(location_path).first;
+    prh -> server_port_num = config.proxy_locations_.at(location_path).second;
     return prh;
 }
 

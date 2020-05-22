@@ -142,6 +142,34 @@ NginxConfigParser::TokenType NginxConfigParser::ParseToken(std::istream* input,
   return TOKEN_TYPE_EOF;
 }
 
+/* bool IsValidPortNum(std::string port_token)
+  Parameter(s):
+    - port_token: Token which contains port value (found from parsing)
+  Returns:
+    - bool which indicates if port_token is a valid port number
+  Description:
+    - Helper function that checks to see if given token is a valid port number.  */
+
+bool IsValidPortNum(std::string port_token) {
+  try {
+    size_t pos = port_token.find(":");
+    // handle the case where we are given the IP_Address:Port_number format
+    if (pos != std::string::npos) {
+      // found a colon
+      port_token = port_token.substr(pos+1);
+    }
+    if (std::stoi(port_token) < 0) {
+      return false;
+    }
+    if (std::stoi(port_token) >= 0 && std::stoi(port_token) <= MAX_PORT) {
+      return true;
+    }
+    return false;
+  } catch (std::exception& e) {
+    BOOST_LOG_TRIVIAL(error) << "Exception: " << e.what();
+  }
+}
+
 /* bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config)
   Parameter(s):
     - config_file: Input stream, coming from the configuration file.
@@ -163,6 +191,10 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   bool save_root_val = false;
   bool expect_handler_type = false;
   bool expect_static_root = false;
+  bool expect_proxy_host = false;
+  bool save_proxy_host_val =  false;
+  bool expect_proxy_port = false;
+  bool save_proxy_port_val = false;
 
   std::string port_token = "port";
   std::string location_token = "location";
@@ -170,9 +202,11 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   std::string static_token = "StaticHandler";
   std::string echo_token = "EchoHandler";
   std::string status_token = "StatusHandler";
+  std::string host_token = "host";
   std::string proxy_token = "ProxyHandler";
 
   std::string location;
+  std::string store_proxy_location_token;
   std::unordered_set<std::string> seen_handlers;
 
   BOOST_LOG_TRIVIAL(info) << "Parsing configuration file...";
@@ -185,6 +219,21 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       SetConfigPortNumberFromToken(token, config);
       BOOST_LOG_TRIVIAL(info) << "Port number: " << token;
       save_port_val = false;
+    }
+    if (save_proxy_port_val) {
+      if (IsValidPortNum(token)) {
+        location = location.substr(1, location.size()-2);
+        BOOST_LOG_TRIVIAL(info) << "Proxy servlet client location: " << location;
+        BOOST_LOG_TRIVIAL(info) << "Proxy servlet server location: " << store_proxy_location_token;
+        BOOST_LOG_TRIVIAL(info) << "Proxy servlet server port number: " << token;
+        config->proxy_locations_[location] = {store_proxy_location_token, stoi(token)};
+      } else {
+        std::cerr << "Please provide a proxy server port number\n";
+        BOOST_LOG_TRIVIAL(error) << "Port number "
+        << std::stoi(port_token) << " is invalid.";
+      }
+      save_proxy_port_val = false;
+      location = "";
     }
     if (save_root_val) {
       // remove the quotes
@@ -199,6 +248,14 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       seen_location = false;
       location = "";
     }
+    if (save_proxy_host_val) {
+      store_proxy_location_token = token.substr(1, token.size() - 2);
+      expect_proxy_port = true;
+      expect_handler_type = false;
+      expect_proxy_host = false;
+      save_proxy_host_val = false;
+      seen_location = false;
+    }
     if (expect_handler_type) {
       if (seen_handlers.find(token) == seen_handlers.end()) {
         config->handler_types_.push_back(token);
@@ -206,6 +263,8 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       seen_handlers.insert(token);
       if (token == static_token) {
         expect_static_root = true;
+      } else if (token == proxy_token) {
+        expect_proxy_host = true;
       } else if (token == echo_token) {
         // remove the quotes
         location = location.substr(1, location.size()-2);
@@ -222,14 +281,6 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
         location = "";
         seen_location = false;
         expect_handler_type = false;
-      } else if (token == proxy_token) {
-        // remove the quotes
-        location = location.substr(1, location.size()-2);
-        BOOST_LOG_TRIVIAL(info) << "Proxy location: " << location;
-        config->proxy_locations_.insert(location);
-        location = "";
-        seen_location = false;
-        expect_handler_type = false;
       }
     }
     if (seen_location) {
@@ -238,12 +289,16 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       seen_location = false;
     }
 
-    if (token == port_token) {
+    if (token == port_token && !expect_proxy_port) {
       save_port_val = true;
     } else if (token == location_token) {
       seen_location = true;
     } else if (expect_static_root && token == root_token) {
       save_root_val = true;
+    } else if (expect_proxy_host && token == host_token) {
+      save_proxy_host_val = true;
+    } else if (expect_proxy_port && token == port_token) {
+      save_proxy_port_val = true;
     }
 
     if (token_type == TOKEN_TYPE_ERROR) {

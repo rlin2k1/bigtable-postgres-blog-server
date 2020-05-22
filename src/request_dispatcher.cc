@@ -72,11 +72,11 @@ void request_dispatcher::create_handler_mapping() {
                 status_handler_enabled = true;
             }
         } else if (*i == "ProxyHandler") {
-          std::unordered_set<std::string> proxy_locations = config_.proxy_locations_;
-          for (std::unordered_set<std::string>::iterator itr = proxy_locations.begin(); itr != proxy_locations.end(); ++itr) {
-            request_handler* proxy_handler = proxy_request_handler::Init(*itr, config_);
+          std::unordered_map<std::string, std::pair<std::string, int>> proxy_locations = config_.proxy_locations_;
+          for (std::unordered_map<std::string, std::pair<std::string, int>>::iterator itr = proxy_locations.begin(); itr != proxy_locations.end(); ++itr) {
+            request_handler* proxy_handler = proxy_request_handler::Init(itr->first, config_);
 
-            dispatcher[*itr] = proxy_handler;  // Set proxy uri path mapping to proxy handler
+            dispatcher[itr->first] = proxy_handler;  // Set proxy uri path mapping to proxy handler
           }
         }
         // ******************************** TEMPLATE FOR NEW HANDLER REGISTRATIONS *******************************

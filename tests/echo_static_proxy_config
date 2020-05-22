@@ -13,3 +13,13 @@ location "/static" StaticHandler {
 location "/static2" StaticHandler {
   root "./files";  # second path points to the same directory
 }
+
+location "/proxy1" ProxyHandler {
+  host "/server1";
+  port 42069;
+}
+
+location "/proxy2" ProxyHandler {
+  host "/server2";
+  port 12345;
+}
