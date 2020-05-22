@@ -35,6 +35,9 @@ Date Created:
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
+#include <boost/thread/thread.hpp>
+
+const int THREAD_POOL_SIZE = 4;
 
 using boost::asio::ip::tcp;
 
@@ -44,7 +47,7 @@ namespace expr = boost::log::expressions;
 namespace sinks = boost::log::sinks;
 namespace keywords = boost::log::keywords;
 
-/* Initializes logger and sets other formatting, 
+/* Initializes logger and sets other formatting,
 filtering, and file rotating information */
 void logging_init() {
   logging::register_simple_formatter_factory
@@ -117,7 +120,18 @@ int main(int argc, char* argv[]) {
     BOOST_LOG_TRIVIAL(info) << "Successfully started web server \
 using port number "<< config.port_number;
 
-    io_service.run();
+    // Create a pool of threads to run all of the io_services.
+    std::vector<boost::shared_ptr<boost::thread> > threads;
+    for (std::size_t i = 0; i < THREAD_POOL_SIZE; ++i)
+    {
+      boost::shared_ptr<boost::thread> thread(new boost::thread(
+            boost::bind(&boost::asio::io_service::run, &io_service)));
+      threads.push_back(thread);
+    }
+
+    // Wait for all threads in the pool to exit.
+    for (std::size_t i = 0; i < threads.size(); ++i)
+      threads[i]->join();
   } catch (std::exception& e) {
     std::cerr << "Exception: " << e.what() << "\n";
   }
