@@ -26,6 +26,7 @@ from subprocess import Popen
 from subprocess import PIPE
 import socket
 import sys
+import os
 import time
 
 NUM_THREADS = 4
@@ -40,6 +41,19 @@ PORT = 8080
 # Sentinel for a successful test
 # ---------------------------------------------------------------------------- #
 exit_code = 0
+
+# ---------------------------------------------------------------------------- #
+# Config file for multithread testing
+# ---------------------------------------------------------------------------- #
+config = (
+     "port 8080;\n"
+     "location \"/echo\" EchoHandler {\n"
+     "\n"
+     "}"
+)
+f = open(CONFIG_NAME, "w")
+f.write(config)
+f.close()
 
 # ---------------------------------------------------------------------------- #
 # Open the web server in a subprocess
@@ -111,6 +125,7 @@ for i in range(NUM_THREADS):
 # Close the webserver
 # ---------------------------------------------------------------------------- #
 webserver.terminate()
+os.remove(CONFIG_NAME)
 
 sys.stdout.write("\nMULTITHREADED TEST SUCCEEDED\n")
 sys.exit(exit_code)
