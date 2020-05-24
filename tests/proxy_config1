@@ -1,0 +1,13 @@
+port 8080;
+
+location "/echo" EchoHandler {
+}
+
+location "/proxy" ProxyHandler {
+  host "localhost/echo";
+  port 8081;
+}
+
+location "/redirect" RedirectHandler {
+  host "/echo";
+}

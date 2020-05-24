@@ -16,3 +16,13 @@ location "/static2" StaticHandler {
 
 location "/status" StatusHandler {
 }
+
+location "/myucla" ProxyHandler {
+  host "my.ucla.edu"
+  port 80;
+}
+
+location "/ucla" ProxyHandler {
+  host "www.ucla.edu";
+  port 80;
+}

@@ -19,7 +19,15 @@ location "/proxy1" ProxyHandler {
   port 42069;
 }
 
+location "/redirect1" RedirectHandler {
+  host "/server1";
+}
+
 location "/proxy2" ProxyHandler {
   host "/server2";
   port 12345;
+}
+
+location "/redirect2" RedirectHandler {
+  host "/server2";
 }

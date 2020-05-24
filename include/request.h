@@ -22,8 +22,13 @@ class Request {
         // The HTML method (GET, PUT, POST, etc)
         enum MethodEnum {
             GET,
+            HEAD,
             POST,
-            DELETE
+            PUT,
+            DELETE,
+            CONNECT,
+            OPTIONS,
+            TRACE
         };
         MethodEnum method_;
 

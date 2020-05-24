@@ -23,10 +23,10 @@ const char crlf[] = { '\r', '\n' };
 
 /* boost::asio::const_buffer ResponseHelperLibrary::to_buffer(Response::StatusCode status)
 Parameter(s):
-    - status: Enum value that indicates status of response (see response.h) 
+    - status: Enum value that indicates status of response (see response.h)
 Returns:
     - Buffer which contains string that corresponds to status of response (see response_helper_library.h)
-Description: 
+Description:
     - Puts status string for generated response in buffer format to send. */
 boost::asio::const_buffer ResponseHelperLibrary::to_buffer(Response::StatusCode status) {
     switch (status) {
@@ -36,6 +36,8 @@ boost::asio::const_buffer ResponseHelperLibrary::to_buffer(Response::StatusCode 
       return boost::asio::buffer(status_strings::bad_request);
     case Response::not_found:
       return boost::asio::buffer(status_strings::not_found);
+    case Response::moved_temporarily:
+      return boost::asio::buffer(status_strings::moved_temporarily);
     default:
       return boost::asio::buffer(status_strings::bad_request);
     }
@@ -43,10 +45,10 @@ boost::asio::const_buffer ResponseHelperLibrary::to_buffer(Response::StatusCode 
 
 /* std::vector<boost::asio::const_buffer> ResponseHelperLibrary::to_buffers(Response& response)
 Parameter(s):
-    - response: Response generated from a request handler. 
+    - response: Response generated from a request handler.
 Returns:
     - Vector of buffers which store header names, values, formatting characters, and response body.
-Description: 
+Description:
     - Formats response information into a buffer format that can be sent. */
 std::vector<boost::asio::const_buffer> ResponseHelperLibrary::to_buffers(Response& response) {
     std::vector<boost::asio::const_buffer> buffers;
@@ -64,7 +66,7 @@ std::vector<boost::asio::const_buffer> ResponseHelperLibrary::to_buffers(Respons
     return buffers;
 }
 
-/* Returns a stock response for 400 and 404 request types. 
+/* Returns a stock response for 400 and 404 request types.
 (See response_helper_library for all stock response strings) */
 std::string ResponseHelperLibrary::to_string(Response::StatusCode status) {
   switch (status) {
@@ -79,7 +81,7 @@ std::string ResponseHelperLibrary::to_string(Response::StatusCode status) {
   }
 }
 
-/* Returns a stock response for valid requests. 
+/* Returns a stock response for valid requests.
 (See response_helper_library for all stock response strings) */
 Response ResponseHelperLibrary::stock_response(Response::StatusCode status) {
   Response response;

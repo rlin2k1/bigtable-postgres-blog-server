@@ -79,6 +79,9 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
             << request_builder_.fullmessage.size();
 
           if (request_builder_.keep_alive) {
+              request_parser_.reset();
+              request_builder_ = request_builder();
+
               boost::asio::async_write(socket_, ResponseHelperLibrary::to_buffers(response_),
                   boost::bind(&session::handle_write, this,
                   boost::asio::placeholders::error));

@@ -17,6 +17,7 @@ Date Created:
 #define HTTP_RESPONSE_PARSER_HPP
 
 #include <tuple>
+#include "response_builder.h"
 
 struct response_builder;
 

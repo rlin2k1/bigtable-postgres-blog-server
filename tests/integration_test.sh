@@ -40,10 +40,15 @@ not_found_request_file="NotFoundRequest.txt"
 masked_echo_request_file="MaskedEchoGetRequest.txt"
 status_request_file="StatusRequest.txt"
 sorted_response_file="SortedResponse.txt"
+echo_proxy_file="EchoProxy.txt"
+echo_proxy_redirect_file="EchoProxyRedirect.txt"
 
 log_file="sample_0.log"
 nondeterministic_log_file="output.log"
 request_log="Request.log"
+
+proxy_config1="proxy_config1"
+proxy_config2="proxy_config2"
 
 printf "port 8080; # The port my server listens on
 
@@ -403,10 +408,51 @@ then
     kill -9 $WEBSERVER_PID
     exit 1 # Exit Failure
 fi
+
 # ---------------------------------------------------------------------------- #
-# Stop the WebServer and Exit
+# Stop the WebServer
 # ---------------------------------------------------------------------------- #
-echo "SUCCESS: PASSED ALL TESTS"
 kill $WEBSERVER_PID
 rm $CONFIG_NAME
+
+# ---------------------------------------------------------------------------- #
+# Start 2 servers and do proxy tests
+# ---------------------------------------------------------------------------- #
+$SRC_DIR/$BINARY_NAME $TEST_DIR"/proxy_config1" &
+WEBSERVER1_PID=$!
+$SRC_DIR/$BINARY_NAME $TEST_DIR"/proxy_config2" &
+WEBSERVER2_PID=$!
+
+curl http://localhost:8080/proxy > "$output_file"
+diff $output_file $TEST_DIR/$echo_proxy_file
+
+if [ $? != 0 ]
+then
+    echo "FAILED: EchoProxy"
+    kill $WEBSERVER1_PID
+    kill $WEBSERVER2_PID
+    exit 1 # Exit Failure
+fi
+
+curl http://localhost:8081/proxy > "$output_file"
+diff $output_file $TEST_DIR/$echo_proxy_redirect_file
+
+if [ $? != 0 ]
+then
+    echo "FAILED: EchoRedirectProxy"
+    kill $WEBSERVER1_PID
+    kill $WEBSERVER2_PID
+    exit 1 # Exit Failure
+fi
+
+# ---------------------------------------------------------------------------- #
+# Kill Both webservers
+# ---------------------------------------------------------------------------- #
+kill $WEBSERVER1_PID
+kill $WEBSERVER2_PID
+
+# ---------------------------------------------------------------------------- #
+# Tests passed and Exit
+# ---------------------------------------------------------------------------- #
+echo "SUCCESS: PASSED ALL TESTS"
 exit 0

@@ -139,6 +139,7 @@ TEST_F(NginxConfigParserTest, EchoStaticProxyConfig) {
   std::string echo_handler = "EchoHandler";
   std::string static_handler = "StaticHandler";
   std::string proxy_handler = "ProxyHandler";
+  std::string redirect_handler = "RedirectHandler";
   std::string server_static_path = "./files";
   std::string client_static_path_1 = "/static";
   std::string client_static_path_2 = "/static2";
@@ -150,12 +151,18 @@ TEST_F(NginxConfigParserTest, EchoStaticProxyConfig) {
   std::string proxy_path_2 = "/proxy2";
   std::string proxy_server_2 = "/server2";
   int proxy_server_port_2 = 12345;
+  std::string redirect_path_1 = "/redirect1";
+  std::string redirect_server_1 = "/server1";
+  std::string redirect_path_2 = "/redirect2";
+  std::string redirect_server_2 = "/server2";
+
 
   bool found_first_echo = out_config.echo_locations_.find(first_echo_path) != out_config.echo_locations_.end();
   bool found_second_echo = out_config.echo_locations_.find(second_echo_path) != out_config.echo_locations_.end();
   bool found_echo_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), echo_handler) != out_config.handler_types_.end();
   bool found_static_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), static_handler) != out_config.handler_types_.end();
   bool found_proxy_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), proxy_handler) != out_config.handler_types_.end();
+  bool found_redirect_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), redirect_handler) != out_config.handler_types_.end();
 
   EXPECT_EQ(out_config.echo_locations_.size(), 2);
   EXPECT_TRUE(found_first_echo);
@@ -163,6 +170,7 @@ TEST_F(NginxConfigParserTest, EchoStaticProxyConfig) {
   EXPECT_TRUE(found_echo_handler);
   EXPECT_TRUE(found_static_handler);
   EXPECT_TRUE(found_proxy_handler);
+  EXPECT_TRUE(found_redirect_handler);
 
   EXPECT_EQ(out_config.static_locations_.size(), 2);
   EXPECT_EQ(out_config.static_locations_[client_static_path_1], server_static_path);
@@ -171,6 +179,8 @@ TEST_F(NginxConfigParserTest, EchoStaticProxyConfig) {
   std::pair<std::string, int> proxy_config_2 = {proxy_server_2, proxy_server_port_2};
   EXPECT_EQ(out_config.proxy_locations_[proxy_path_1], proxy_config_1);
   EXPECT_EQ(out_config.proxy_locations_[proxy_path_2], proxy_config_2);
+  EXPECT_EQ(out_config.redirect_locations_[redirect_path_1], redirect_server_1);
+  EXPECT_EQ(out_config.redirect_locations_[redirect_path_2], redirect_server_2);
 }
 
 TEST_F(NginxConfigParserTest, SpacePathConfig) {

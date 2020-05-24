@@ -24,6 +24,7 @@ Date Created:
 #include "error_404_request_handler.h"
 #include "status_request_handler.h"
 #include "proxy_request_handler.h"
+#include "redirect_request_handler.h"
 
 /* request_dispatcher Constructor
 Parameter(s):
@@ -78,6 +79,13 @@ void request_dispatcher::create_handler_mapping() {
 
             dispatcher[itr->first] = proxy_handler;  // Set proxy uri path mapping to proxy handler
           }
+        } else if (*i == "RedirectHandler") {
+          auto& redirect_locations = config_.redirect_locations_;
+          for (auto itr = redirect_locations.begin(); itr != redirect_locations.end(); ++itr) {
+            request_handler* redirect_handler = redirect_request_handler::Init(itr->first, config_);
+
+            dispatcher[itr->first] = redirect_handler;  // Set proxy uri path mapping to proxy handler
+          }
         }
         // ******************************** TEMPLATE FOR NEW HANDLER REGISTRATIONS *******************************
         // else if (*i == "NEWHandler") {  // TODO (newteam): Add a new handler. Your handler may not need an unordered_map to track locations
@@ -122,9 +130,25 @@ request_handler* request_dispatcher::get_handler(std::string uri) {
         return dispatcher[static_path];
     } else if (config_.status_locations_.find(uri) != config_.status_locations_.end()) {
         return dispatcher[uri];
-    } else {
-        return error_handler_;
+    } else if (config_.redirect_locations_.find(uri) != config_.redirect_locations_.end()) {
+        return dispatcher[uri];
     }
+
+    std::string uri_prefix;
+    bool found = false;
+    for (const auto& pair : config_.proxy_locations_) {
+        uri_prefix = uri.substr(0, pair.first.length());
+        if (uri_prefix == pair.first) {
+            found = true;
+            break;
+        }
+    }
+
+    if (found) {
+        return dispatcher[uri_prefix];
+    }
+
+    return error_handler_;
     // ******* TEMPLATE FOR DISPATCHING NEW HANDLERS ********
     // else if (your condition here) {
     //     return dispatcher[your path]

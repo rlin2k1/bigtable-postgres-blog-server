@@ -46,6 +46,16 @@ class request_builder {
                 req.method_ = Request::MethodEnum::POST;
             } else if (method == "DELETE") {
                 req.method_ = Request::MethodEnum::DELETE;
+            } else if (method == "HEAD") {
+                req.method_ = Request::MethodEnum::HEAD;
+            } else if (method == "PUT") {
+                req.method_ = Request::MethodEnum::PUT;
+            } else if (method == "CONNECT") {
+                req.method_ = Request::MethodEnum::CONNECT;
+            } else if (method == "OPTIONS") {
+                req.method_ = Request::MethodEnum::OPTIONS;
+            } else if (method == "TRACE") {
+                req.method_ = Request::MethodEnum::TRACE;
             }
             req.uri_ = uri;
             std::string version = "HTTP/" + std::to_string(http_version_major) + "." + std::to_string(http_version_minor);

@@ -23,6 +23,11 @@ COPY --from=builder /usr/src/project/config .
 # Copy static files to "."
 COPY files/ files/
 
+# Copy dynamic library for libxml2
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libxml2* /usr/lib/x86_64/
+# Copy dynamic library for ICU library
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libicu* /usr/lib/x86_64/
+
 # Expose some port(s)
 EXPOSE 80
 

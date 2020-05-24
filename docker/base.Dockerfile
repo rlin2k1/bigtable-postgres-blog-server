@@ -11,7 +11,10 @@ RUN apt-get update && apt-get install -y \
     libboost-log-dev \
     libboost-signals-dev \
     libboost-system-dev \
+    libboost-iostreams-dev \
     libgtest-dev \
     netcat \
     gcovr \
-    libboost-regex-dev
+    libboost-regex-dev \
+    libxml2-dev \
+    libxml2

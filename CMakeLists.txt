@@ -29,31 +29,36 @@ add_subdirectory(/usr/src/googletest googletest)
 # Enable Boost
 # Use static libraries so binaries can be deployed without a full boost install
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.50 REQUIRED COMPONENTS system log)
+find_package(Boost 1.50 REQUIRED COMPONENTS system log iostreams)
 message(STATUS "Boost version: ${Boost_VERSION}")
 
+set(LibXml2_USE_STATIC_LIBS ON)
+
+find_package(LibXml2 REQUIRED)
+find_package(ZLIB REQUIRED)
+
 include_directories(include)
+include_directories(${LIBXML2_INCLUDE_DIRS})
 
 # Update name and srcs - ** we'll need to update these after refactoring
-add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParser.cc src/request_parser.cc src/response_helper_library.cc src/static_request_handler.cc  src/echo_request_handler.cc src/request_dispatcher.cc src/error_404_request_handler.cc src/status_request_handler.cc src/proxy_request_handler.cc src/response_parser.cc)
-
+add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParser.cc src/request_parser.cc src/response_helper_library.cc src/static_request_handler.cc  src/echo_request_handler.cc src/request_dispatcher.cc src/error_404_request_handler.cc src/status_request_handler.cc src/proxy_request_handler.cc src/redirect_request_handler.cc src/response_parser.cc)
 
 # Update executable name, srcs, and deps
 add_executable(webserver src/server_main.cc)
-target_link_libraries(webserver session_server_lib Boost::system Boost::log_setup Boost::log)
+target_link_libraries(webserver session_server_lib Boost::system Boost::log_setup Boost::log Boost::iostreams ZLIB::ZLIB ${LIBXML2_LIBRARY})
 
 # Update test executable name, srcs, and deps
 add_executable(config_parser_test tests/config_parser_test.cc)
-target_link_libraries(config_parser_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log)
+target_link_libraries(config_parser_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log Boost::iostreams ZLIB::ZLIB ${LIBXML2_LIBRARY})
 
 add_executable(request_parser_handler_test tests/request_handler_test.cc tests/request_parser_test.cc)
-target_link_libraries(request_parser_handler_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log)
+target_link_libraries(request_parser_handler_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log Boost::iostreams ZLIB::ZLIB ${LIBXML2_LIBRARY})
 
 add_executable(response_test tests/response_test.cc)
-target_link_libraries(response_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log)
+target_link_libraries(response_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log Boost::iostreams ZLIB::ZLIB ${LIBXML2_LIBRARY})
 
 add_executable(response_parser_test tests/response_parser_test.cc)
-target_link_libraries(response_parser_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log)
+target_link_libraries(response_parser_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log Boost::iostreams ZLIB::ZLIB ${LIBXML2_LIBRARY})
 
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)

@@ -195,6 +195,8 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   bool save_proxy_host_val =  false;
   bool expect_proxy_port = false;
   bool save_proxy_port_val = false;
+  bool expect_redirect_host = false;
+  bool save_redirect_host_val = false;
 
   std::string port_token = "port";
   std::string location_token = "location";
@@ -204,9 +206,11 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   std::string status_token = "StatusHandler";
   std::string host_token = "host";
   std::string proxy_token = "ProxyHandler";
+  std::string redirect_token = "RedirectHandler";
 
   std::string location;
   std::string store_proxy_location_token;
+  std::string store_redirect_location_token;
   std::unordered_set<std::string> seen_handlers;
 
   BOOST_LOG_TRIVIAL(info) << "Parsing configuration file...";
@@ -256,6 +260,19 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       save_proxy_host_val = false;
       seen_location = false;
     }
+    if (save_redirect_host_val) {
+      location = location.substr(1, location.size() - 2);
+      store_redirect_location_token = token.substr(1, token.size() - 2);
+      BOOST_LOG_TRIVIAL(info) << "Proxy servlet client location: " << location;
+      BOOST_LOG_TRIVIAL(info) << "Proxy servlet server location: " << store_proxy_location_token;
+      config->redirect_locations_[location] = store_redirect_location_token;
+
+      expect_redirect_host = false;
+      expect_handler_type = false;
+      expect_proxy_port = false;
+      save_redirect_host_val = false;
+      seen_location = false;
+    }
     if (expect_handler_type) {
       if (seen_handlers.find(token) == seen_handlers.end()) {
         config->handler_types_.push_back(token);
@@ -263,6 +280,8 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       seen_handlers.insert(token);
       if (token == static_token) {
         expect_static_root = true;
+      } else if (token == redirect_token) {
+        expect_redirect_host = true;
       } else if (token == proxy_token) {
         expect_proxy_host = true;
       } else if (token == echo_token) {
@@ -299,6 +318,8 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       save_proxy_host_val = true;
     } else if (expect_proxy_port && token == port_token) {
       save_proxy_port_val = true;
+    } else if (expect_redirect_host && token == host_token) {
+      save_redirect_host_val = true;
     }
 
     if (token_type == TOKEN_TYPE_ERROR) {
