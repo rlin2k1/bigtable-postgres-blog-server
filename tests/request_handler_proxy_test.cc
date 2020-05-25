@@ -36,11 +36,11 @@ class Proxy_Request_HandlerTest : public ::testing::Test {
   }
 };
 
-TEST_F(Proxy_Request_HandlerTest, SimpleTest) {
+TEST_F(Proxy_Request_HandlerTest, UCLATest) {
   // Tests if proxy handler properly gets hotdog image from radd.cs130.org
-  std::string golden = GetGolden("./hotdoggolden.jpeg");
-  std::string path = "/simpletest";
-  SetHandler(path, "/static/images/hotdog.jpeg");
+  std::string golden = GetGolden("./favicongolden.ico");
+  std::string path = "/UCLAtest";
+  SetHandler(path, "/favicon.ico");
   Response test = proxy_request_handler_->handle_request(request_);
   EXPECT_EQ(test.code_, 200);
   EXPECT_EQ(test.body_, golden);
