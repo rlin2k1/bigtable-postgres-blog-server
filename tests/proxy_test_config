@@ -1,0 +1,11 @@
+port 8080; # The port my server listens on
+
+location "/simpletest" ProxyHandler {
+  host "radd.cs130.org";
+  port 80;
+}
+
+location "/exampletest" ProxyHandler {
+  host "www.example.com";
+  port 80;
+}

@@ -54,6 +54,9 @@ target_link_libraries(config_parser_test session_server_lib gtest_main Boost::sy
 add_executable(request_parser_handler_test tests/request_handler_test.cc tests/request_parser_test.cc)
 target_link_libraries(request_parser_handler_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log Boost::iostreams ZLIB::ZLIB ${LIBXML2_LIBRARY})
 
+add_executable(request_handler_proxy_test tests/request_handler_proxy_test.cc)
+target_link_libraries(request_handler_proxy_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log Boost::iostreams ZLIB::ZLIB ${LIBXML2_LIBRARY})
+
 add_executable(response_test tests/response_test.cc)
 target_link_libraries(response_test session_server_lib gtest_main Boost::system Boost::log_setup Boost::log Boost::iostreams ZLIB::ZLIB ${LIBXML2_LIBRARY})
 
@@ -63,6 +66,7 @@ target_link_libraries(response_parser_test session_server_lib gtest_main Boost::
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(request_parser_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(request_handler_proxy_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(response_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(response_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 add_test(NAME integration_test COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration_test.sh)
@@ -71,4 +75,4 @@ add_test(NAME multithreading_test COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/te
 # Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
 
-generate_coverage_report(TARGETS webserver session_server_lib TESTS config_parser_test request_parser_handler_test response_test response_parser_test)
+generate_coverage_report(TARGETS webserver session_server_lib TESTS config_parser_test request_parser_handler_test request_handler_proxy_test response_test response_parser_test)
