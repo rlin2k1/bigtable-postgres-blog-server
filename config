@@ -26,3 +26,6 @@ location "/ucla" ProxyHandler {
   host "www.ucla.edu";
   port 80;
 }
+
+location "/health" HealthHandler {
+}

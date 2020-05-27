@@ -304,6 +304,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       } else if (token == health_token) {
         // remove the quotes
         location = location.substr(1, location.size()-2);
+        BOOST_LOG_TRIVIAL(info) << "Health location: " << location;
         config->health_locations_.insert(location);
         location = "";
         seen_location = false;

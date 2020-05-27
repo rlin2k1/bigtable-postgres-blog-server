@@ -32,6 +32,7 @@ status_request_handler::status_request_handler(const NginxConfig& config) {
     std::unordered_set<std::string> echo_locations = config.echo_locations_;
     std::unordered_map<std::string, std::string> static_locations = config.static_locations_;
     std::unordered_map<std::string, std::pair<std::string, int>> proxy_locations = config.proxy_locations_;
+
     std::string config_handlers = "";
     if (!(echo_locations).empty()) {
         config_handlers += "EchoHandler(s):\r\n";
@@ -54,6 +55,7 @@ status_request_handler::status_request_handler(const NginxConfig& config) {
             config_handlers += "\r\n";
         }
     }
+
     BOOST_LOG_TRIVIAL(info) << "StatusHandler found list of existing handlers.";
     handler_list = config_handlers;
     // Initializing counter that keeps track of num of requests.
