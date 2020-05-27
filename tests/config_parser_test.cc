@@ -196,3 +196,20 @@ TEST_F(NginxConfigParserTest, SpacePathConfig) {
   EXPECT_TRUE(found_echo);
   EXPECT_TRUE(found_echo_handler);
 }
+
+TEST_F(NginxConfigParserTest, HealthHandlerConfig) {
+  bool success = parser.Parse("health_config", &out_config);
+
+  EXPECT_TRUE(success);
+  std::string health_handler = "HealthHandler";
+  std::string health_path_1 = "/health";
+  std::string health_path_2 = "/health2";
+  bool found_health_1 = out_config.health_locations_.find(health_path_1) != out_config.health_locations_.end();
+  bool found_health_2 = out_config.health_locations_.find(health_path_2) != out_config.health_locations_.end();
+  bool found_health_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), health_handler) != out_config.handler_types_.end();
+
+  EXPECT_EQ(out_config.health_locations_.size(), 2);
+  EXPECT_TRUE(found_health_1);
+  EXPECT_TRUE(found_health_2);
+  EXPECT_TRUE(found_health_handler);
+}
