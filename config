@@ -29,3 +29,6 @@ location "/ucla" ProxyHandler {
 
 location "/health" HealthHandler {
 }
+
+location "/health2" HealthHandler {
+}
