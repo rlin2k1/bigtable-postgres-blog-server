@@ -23,6 +23,7 @@ BINARY_NAME=webserver
 CONFIG_NAME=integration_test_config
 IP_ADDRESS=localhost
 PORT=8080
+SLEEPTIME=0.5
 
 output_file="output.txt"
 output_jpg_file="output.jpg"
@@ -84,7 +85,7 @@ chmod +x $SRC_DIR/$BINARY_NAME
 $SRC_DIR/$BINARY_NAME $CONFIG_NAME &
 WEBSERVER_PID=$!
 
-sleep 0.5 # Wait for Server to Start Up
+sleep $SLEEPTIME # Wait for Server to Start Up
 
 # ---------------------------------------------------------------------------- #
 # Run the Tests
@@ -420,8 +421,11 @@ rm $CONFIG_NAME
 # ---------------------------------------------------------------------------- #
 $SRC_DIR/$BINARY_NAME $TEST_DIR"/proxy_config1" &
 WEBSERVER1_PID=$!
+sleep $SLEEPTIME
+
 $SRC_DIR/$BINARY_NAME $TEST_DIR"/proxy_config2" &
 WEBSERVER2_PID=$!
+sleep $SLEEPTIME
 
 curl http://localhost:8080/proxy > "$output_file"
 diff $output_file $TEST_DIR/$echo_proxy_file
