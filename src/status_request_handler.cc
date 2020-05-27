@@ -84,7 +84,8 @@ status_request_handler* status_request_handler::Init(const std::string& location
     Description:
         - Response object is generated and returned, with status information stored in the response body. */
 Response status_request_handler::handle_request(const Request& request) {
-    BOOST_LOG_TRIVIAL(info) << "Currently serving status requests on path: " << request.uri_;
+    BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]Request_Handler: status" ;
+    // BOOST_LOG_TRIVIAL(info) << "Currently serving status requests on path: " << request.uri_;
     Response response;
     std::string num_received_req = "Number of requests received: " + std::to_string(request_counter) + "\r\n";
     std::string formatted_content = num_received_req + received_request_list + handler_list;

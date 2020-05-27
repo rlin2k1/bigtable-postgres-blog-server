@@ -75,7 +75,8 @@ Returns:
 Description: 
     - Response object is generated and returned, using the request message as the response body. */
 Response echo_request_handler::handle_request(const Request& request) {
-    BOOST_LOG_TRIVIAL(info) << "Currently serving echo requests on path: " << request.uri_;
+    BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]Request_Handler: echo" ;
+    // BOOST_LOG_TRIVIAL(info) << "Currently serving echo requests on path: " << request.uri_;
     Response response;
 
     std::string full_request_str = build_request_string(request);

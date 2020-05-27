@@ -403,6 +403,7 @@ Description:
     - Handler uses request URI to get full proxy destination, issue a request to that destination,
     and return the response. Also handles HTTP 302 Redirect. */
 Response proxy_request_handler::handle_request(const Request& request) {
+    BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]Request_Handler: proxy" ;
     // Get the URI, the new URI will be the URI given here + the server path
     std::string uri = request.uri_.substr(client_location_path_.length());
     uri = server_location_path_ + uri;

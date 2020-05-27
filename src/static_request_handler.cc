@@ -93,6 +93,7 @@ Description:
     - Handler uses request URI to find mapping of client path to server path.
     Once path is found, file is opened and served back to client. */
 Response static_request_handler::handle_request(const Request& request) {
+    BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]Request_Handler: static" ;
     // Find the root directory and target file from the client's request uri
     Response response;
 

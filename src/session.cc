@@ -74,9 +74,13 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
             }
 
             BOOST_LOG_TRIVIAL(info) << "Parsed request successfully.";
-            BOOST_LOG_TRIVIAL(info) << req.method_ << " " << req.uri_
+            BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]RequestPath: " << req.uri_;
+            BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]ResponseCode: " << response_.code_;
+            BOOST_LOG_TRIVIAL(info) << req.method_ << " " << req.uri_ << " "
             << req.version_ << " " << response_.code_ << " "
             << request_builder_.fullmessage.size();
+
+
 
           if (request_builder_.keep_alive) {
               request_parser_.reset();

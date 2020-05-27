@@ -44,6 +44,7 @@ Description:
     - Response object is generated and returned, with generic stock response 
     in body and corresponding response code. */
 Response error_404_request_handler::handle_request(const Request& request) {
+    BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]Request_Handler: 404" ;
     BOOST_LOG_TRIVIAL(info) << "Request not found: 404 error.";
     Response response;
 

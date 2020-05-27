@@ -63,7 +63,7 @@ void server::handle_accept(session* new_session, const boost::system::error_code
                 boost::system::error_code ec;
                 boost::asio::ip::tcp::endpoint endpoint = new_session->socket().remote_endpoint(ec);
                 BOOST_LOG_TRIVIAL(info) << "Successfully started new session.";
-                BOOST_LOG_TRIVIAL(info) << "Client at IP Address: " << endpoint;
+                BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]Client_IP: " << endpoint;
 
         new_session->start();
     } else {
