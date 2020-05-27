@@ -207,6 +207,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   std::string host_token = "host";
   std::string proxy_token = "ProxyHandler";
   std::string redirect_token = "RedirectHandler";
+  std::string health_token = "HealthHandler";
 
   std::string location;
   std::string store_proxy_location_token;
@@ -297,6 +298,13 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
         location = location.substr(1, location.size()-2);
         BOOST_LOG_TRIVIAL(info) << "Status location: " << location;
         config->status_locations_.insert(location);
+        location = "";
+        seen_location = false;
+        expect_handler_type = false;
+      } else if (token == health_token) {
+        // remove the quotes
+        location = location.substr(1, location.size()-2);
+        config->health_locations_.insert(location);
         location = "";
         seen_location = false;
         expect_handler_type = false;
