@@ -28,7 +28,7 @@ health_request_handler* health_request_handler::Init(const std::string& location
 }
 
 Response health_request_handler::handle_request(const Request& request) {
-    BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics] Health_Request_Handler: 200" ;
+    BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]Request_Handler: health" ;
     BOOST_LOG_TRIVIAL(info) << "Health Request ok: success.";
     Response response;
 
