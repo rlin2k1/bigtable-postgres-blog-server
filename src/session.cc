@@ -98,6 +98,9 @@ void session::handle_read(const boost::system::error_code& error, size_t bytes_t
             response_ = ResponseHelperLibrary::stock_response(Response::bad_request);
             BOOST_LOG_TRIVIAL(error) << "Request is bad. Invalid request,\
  shutting down session.";
+            BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]Request_Handler: 400";
+            BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]RequestPath: 400";
+            BOOST_LOG_TRIVIAL(info) << "[ResponseMetrics]ResponseCode: 400";
             boost::asio::async_write(socket_, ResponseHelperLibrary::to_buffers(response_),
                 boost::bind(&session::shutdown, this,
                 boost::asio::placeholders::error));
