@@ -21,7 +21,7 @@ class HealthRequestHandler : public ::testing::Test {
 
 TEST_F(HealthRequestHandler, SimpleGetRequest) {
   char request_data[] = "GET /health HTTP/1.1\r\n\r\n";
-  std::string text_payload = "OK\r\n\r\n";
+  std::string text_payload = "OK";
   std::tie(result, std::ignore) = request_parser_.parse(
             request_builder_, request_data, request_data + sizeof(request_data));
   response_ = health_request_handler_.handle_request(request_builder_.build_request());

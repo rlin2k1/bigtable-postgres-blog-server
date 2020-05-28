@@ -34,7 +34,7 @@ Response health_request_handler::handle_request(const Request& request) {
 
     // Fill out the Response to be sent to the client.
     response.code_ = Response::ok;
-    response.body_ = "OK\r\n\r\n";
+    response.body_ = "OK";
     response.headers_["Content-Length"] = std::to_string(response.body_.size());
     response.headers_["Content-Type"] = "text/plain";
 

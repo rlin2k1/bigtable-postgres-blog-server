@@ -76,6 +76,9 @@ location \"/sta tic\" StaticHandler {
 
 location \"/status\" StatusHandler {
 }
+
+location \"/health\" HealthHandler {
+}
 " > $CONFIG_NAME;
 
 # ---------------------------------------------------------------------------- #
@@ -409,6 +412,24 @@ then
     kill -9 $WEBSERVER_PID
     exit 1 # Exit Failure
 fi
+
+rm $output_file
+#---------------------------------------------------------------------------------------------------
+curl -s localhost:$PORT/health > $output_file
+printf "OK" > ok.txt
+
+diff $output_file ok.txt
+
+if [ $? != 0 ]
+then
+    echo "FAILED: GETHealth"
+    rm ok.txt
+    kill -9 $WEBSERVER_PID
+    exit 1 # Exit Failure
+fi
+
+rm $output_file
+rm ok.txt
 
 # ---------------------------------------------------------------------------- #
 # Stop the WebServer
