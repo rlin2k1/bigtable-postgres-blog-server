@@ -36,6 +36,8 @@ set(LibXml2_USE_STATIC_LIBS ON)
 
 find_package(LibXml2 REQUIRED)
 find_package(ZLIB REQUIRED)
+# include_directories(bigtable/include) # Uncomment to use the bigtable library
+# find_package(bigtable_client REQUIRED) # Uncomment to use the bigtable library -> Add to target_link_libraries (bigtable_client) | Add to add_library (bigtable/src/blog_bigtable.cc)
 
 set(PQXX /usr/local/include/pqxx)
 find_library(PQXX_LIB pqxx)

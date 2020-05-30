@@ -11,23 +11,27 @@ Author(s):
 Date Created:
     June 3rd, 2020
 */
+#ifndef BLOG_DATABASE_HPP
+#define BLOG_DATABASE_HPP
+
 #include <string>
 #include <vector>
 #include <mutex>
 #include <pqxx/pqxx>
 
-#include "blog.h"
+#include "database.h"
 
-class blog_database {
+class blog_database : public database{
  public:
     blog_database(std::string dbname, std::string user, std::string password, std::string hostaddr, std::string port);
     ~blog_database();
 
-    int insert_blog(std::string title, std::string body); // Returns postid of the blog post -> To be used in 302 redirect
-    Blog get_blog(int postid); // Returns a blog struct
-    std::vector<Blog> get_all_blogs(); // List of all blog posts
+    virtual int insert_blog(std::string title, std::string body); // Returns postid of the blog post -> To be used in 302 redirect
+    virtual Blog get_blog(int postid); // Returns a blog struct
+    virtual std::vector<Blog> get_all_blogs(); // List of all blog posts
 
  private:
-    mutable std::mutex mtx_;
     pqxx::connection* conn_;
 };
+
+#endif  // BLOG_DATABASE_HPP
