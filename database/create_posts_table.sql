@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS posts;
+CREATE TABLE posts(postid SERIAL PRIMARY KEY, title TEXT, body TEXT);

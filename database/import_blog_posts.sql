@@ -1,0 +1,10 @@
+INSERT INTO posts (postid, title, body) VALUES (DEFAULT, 'TestTitle1','TestBody1');
+INSERT INTO posts (postid, title, body) VALUES (DEFAULT, 'TestTitle2','TestBody2');
+INSERT INTO posts (postid, title, body) VALUES (DEFAULT, 'TestTitle3','TestBody3');
+INSERT INTO posts (postid, title, body) VALUES (DEFAULT, 'TestTitle4','TestBody4');
+INSERT INTO posts (postid, title, body) VALUES (DEFAULT, 'TestTitle5','TestBody5');
+INSERT INTO posts (postid, title, body) VALUES (DEFAULT, 'TestTitle6','TestBody6');
+INSERT INTO posts (postid, title, body) VALUES (DEFAULT, 'TestTitle7','TestBody7');
+INSERT INTO posts (postid, title, body) VALUES (DEFAULT, 'TestTitle8','TestBody8');
+INSERT INTO posts (postid, title, body) VALUES (DEFAULT, 'TestTitle9','TestBody9');
+INSERT INTO posts (postid, title, body) VALUES (DEFAULT, 'TestTitle10','TestBody10');

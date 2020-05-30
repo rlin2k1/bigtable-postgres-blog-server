@@ -17,4 +17,5 @@ RUN apt-get update && apt-get install -y \
     gcovr \
     libboost-regex-dev \
     libxml2-dev \
-    libxml2
+    libxml2 \
+    libpqxx-dev
