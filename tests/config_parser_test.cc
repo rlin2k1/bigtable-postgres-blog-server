@@ -213,3 +213,27 @@ TEST_F(NginxConfigParserTest, HealthHandlerConfig) {
   EXPECT_TRUE(found_health_2);
   EXPECT_TRUE(found_health_handler);
 }
+
+TEST_F(NginxConfigParserTest, BlogHandlerConfig) {
+  bool success = parser.Parse("blog_config", &out_config);
+
+  EXPECT_TRUE(success);
+  std::string upload_form_handler = "UploadFormHandler";
+  std::string blog_handler = "BlogHandler";
+  std::string upload_form_path = "/uploadform";
+  std::string blog_path = "/blog";
+  std::string test_ip = "34.83.52.12";
+  std::string found_ip = out_config.blog_locations_[blog_path];
+  bool found_upload_form_path = out_config.upload_form_locations_.find(upload_form_path) != out_config.upload_form_locations_.end();
+  bool found_blog_path = out_config.blog_locations_.find(blog_path) != out_config.blog_locations_.end();
+  bool found_upload_form_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), upload_form_handler) != out_config.handler_types_.end();
+  bool found_blog_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), blog_handler) != out_config.handler_types_.end();
+
+  EXPECT_EQ(out_config.upload_form_locations_.size(), 1);
+  EXPECT_EQ(out_config.blog_locations_.size(), 1);
+  EXPECT_EQ(test_ip, found_ip);
+  EXPECT_TRUE(found_upload_form_path);
+  EXPECT_TRUE(found_blog_path);
+  EXPECT_TRUE(found_upload_form_handler);
+  EXPECT_TRUE(found_blog_handler);
+}

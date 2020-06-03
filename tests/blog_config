@@ -1,0 +1,6 @@
+location "/uploadform" UploadFormHandler {
+}
+
+location "/blog" BlogHandler {
+    host "34.83.52.12";
+}

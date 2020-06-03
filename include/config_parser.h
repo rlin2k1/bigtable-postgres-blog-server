@@ -44,6 +44,8 @@ class NginxConfig {
   std::unordered_map<std::string, std::pair<std::string, int>> proxy_locations_;
   std::unordered_map<std::string, std::string> redirect_locations_;
   std::unordered_set<std::string> health_locations_;
+  std::unordered_set<std::string> upload_form_locations_;
+  std::unordered_map<std::string, std::string> blog_locations_;
   std::vector<std::string> handler_types_;
 };
 
