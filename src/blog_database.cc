@@ -12,26 +12,28 @@ Date Created:
     June 3rd, 2020
 */
 #include <sstream>
-#include <iostream> //TODO (ROY): Remove after Logging
+#include <boost/log/trivial.hpp>
 
 #include "blog_database.h"
 
 blog_database::blog_database(std::string dbname, std::string user, std::string password, std::string hostaddr, std::string port){
     std::stringstream ss;
-    ss << "dbname = " << dbname << " user = " << user << " password = " << password << " hostaddr = " << hostaddr << " port = " << port;
-    // TODO(ROY): Possibly put credentials in a permissions locked file
+    ss << "dbname = " << dbname << " user = " << user \
+    << " password = " << password << " hostaddr = " << hostaddr \
+    << " port = " << port;
     // assign to std::string
     std::string credentials = ss.str();
 
     try {
         conn_ = new pqxx::connection(credentials);
         if (conn_->is_open()) {
-            std::cout << "Opened database successfully: " << conn_->dbname() << std::endl; //TODO (ROY): LOGGING
+            BOOST_LOG_TRIVIAL(info) \
+            << "Opened database connection successfully: " << conn_->dbname();
         } else {
-            std::cout << "Can't open database" << std::endl; //TODO (ROY): LOGGING
+            BOOST_LOG_TRIVIAL(error) << "Can't connect to database";
         }
     } catch (const std::exception &e) {
-        std::cerr << e.what() << std::endl;
+        BOOST_LOG_TRIVIAL(info) << e.what();
     }
 }
 
@@ -60,10 +62,12 @@ int blog_database::add_blog(std::string title, std::string body){
       R.at(0).at(0).to(postid);
 
       W.commit();
-      std::cout << "Records created successfully" << std::endl; //TODO (ROY): LOGGING
+      BOOST_LOG_TRIVIAL(info) \
+      << "Finished attempt to insert blog post with postid: " \
+      << std::to_string(postid);
       return postid;
    } catch (const std::exception &e) {
-      std::cerr << e.what() << std::endl;
+      BOOST_LOG_TRIVIAL(info) << e.what();
       return -1;
    }
 } // auto unlock (lock_guard, RAII)
@@ -76,10 +80,8 @@ Blog blog_database::get_blog(int postid) {
     };
 
     try {
-        std::string sql;
-
         // Create SQL Statement
-        sql = "SELECT * from posts WHERE postid=" + std::to_string(postid); // TODO (ROY): Prepared Statements to Prevent SQL Injection
+        std::string sql = "SELECT * from posts WHERE postid=" + std::to_string(postid); // TODO (ROY): Prepared Statements to Prevent SQL Injection
 
         std::lock_guard<std::mutex> guard(this->mtx_);
 
@@ -89,16 +91,18 @@ Blog blog_database::get_blog(int postid) {
         // Execute SQL Query
         pqxx::result R( N.exec( sql ));
 
-        // Get result
+        // Get results
         blog = {
             R.at(0).at(0).as<int>(), // postid
             R.at(0).at(1).as<std::string>(), // title
             R.at(0).at(2).as<std::string>() //body
         };
 
-        std::cout << "Operation done successfully" << std::endl; //TODO (ROY): LOGGING
+        BOOST_LOG_TRIVIAL(info) \
+        << "Finished attempt to obtain blog post with postid: " \
+        << std::to_string(postid);
     } catch (const std::exception &e) {
-        std::cerr << e.what() << std::endl;
+        BOOST_LOG_TRIVIAL(info) << e.what();
     }
     return blog;
 } // auto unlock (lock_guard, RAII)
@@ -127,9 +131,9 @@ std::vector<Blog> blog_database::get_all_blogs() {
           };
           res.push_back(blog);
         }
-        std::cout << "Operation done successfully" << std::endl; //TODO (ROY): LOGGING
+        BOOST_LOG_TRIVIAL(info) << "Finish attempt to obtain all blog posts";
     } catch (const std::exception &e) {
-        std::cerr << e.what() << std::endl;
+        BOOST_LOG_TRIVIAL(info) << e.what();
     }
 
     return res;

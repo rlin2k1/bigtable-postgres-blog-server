@@ -21,7 +21,6 @@ Date Created:
 class blog_database {
  public:
     blog_database(std::string dbname, std::string user, std::string password, std::string hostaddr, std::string port);
-    // TODO(ROY): Possibly put credentials in a permissions locked file
     ~blog_database();
 
     int add_blog(std::string title, std::string body); // Returns postid of the blog post -> To be used in 302 redirect
