@@ -134,7 +134,7 @@ using port number "<< config.port_number;
     // Commenting out for now because everytime we do a gcloud build, this gets run and inputs extra entries into the db
     blog_database bd("postgres", "ucla", "ucla", "34.83.52.12", "5432");
     std::cout << "INSERTING BLOG POST with Title: TitlePost and Body: BodyPost and Generated PostID:" << std::endl;
-    std::cout << bd.add_blog("TitlePost", "BodyPost") << std::endl;
+    std::cout << bd.insert_blog("TitlePost", "BodyPost") << std::endl;
     std::cout << "GETTING ALL BLOG POSTS IN DATABASE------------------------------------" << std::endl;
     std::vector<Blog> blogs = bd.get_all_blogs();
     for (auto vectorit = blogs.begin(); vectorit != blogs.end(); ++vectorit) {

@@ -23,7 +23,7 @@ class blog_database {
     blog_database(std::string dbname, std::string user, std::string password, std::string hostaddr, std::string port);
     ~blog_database();
 
-    int add_blog(std::string title, std::string body); // Returns postid of the blog post -> To be used in 302 redirect
+    int insert_blog(std::string title, std::string body); // Returns postid of the blog post -> To be used in 302 redirect
     Blog get_blog(int postid); // Returns a blog struct
     std::vector<Blog> get_all_blogs(); // List of all blog posts
 

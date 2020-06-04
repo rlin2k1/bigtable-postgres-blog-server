@@ -32,6 +32,19 @@ blog_database::blog_database(std::string dbname, std::string user, std::string p
         } else {
             BOOST_LOG_TRIVIAL(error) << "Can't connect to database";
         }
+
+        // -------------------------------------------------------------------------- //
+        // Prepared statements - initialized once
+        // -------------------------------------------------------------------------- //
+        conn_->prepare(
+        "insert_blog",
+        "INSERT INTO posts (postid, title, body) VALUES (DEFAULT, $1, $2) RETURNING postid;");
+        conn_->prepare(
+        "get_blog",
+        "SELECT * from posts WHERE postid = $1");
+        conn_->prepare(
+        "get_all_blogs",
+        "SELECT * from posts");
     } catch (const std::exception &e) {
         BOOST_LOG_TRIVIAL(info) << e.what();
     }
@@ -42,13 +55,9 @@ blog_database::~blog_database() {
     delete this->conn_;
 }
 
-int blog_database::add_blog(std::string title, std::string body){
+int blog_database::insert_blog(std::string title, std::string body){
   try {
       int postid = -1;
-
-      // Create SQL Statement
-      std::string sql = "INSERT INTO posts (postid, title, body) "  \
-        "VALUES (DEFAULT, '" + title + "', '" + body + "') RETURNING postid;"; // TODO (ROY): Prepared Statements to Prevent SQL Injection
 
       std::lock_guard<std::mutex> guard(this->mtx_);
 
@@ -56,7 +65,7 @@ int blog_database::add_blog(std::string title, std::string body){
       pqxx::work W(*(this->conn_));
 
       // Execute SQL Query
-      pqxx::result R( W.exec( sql ));
+      pqxx::result R = W.prepared("insert_blog")(title)(body).exec();
 
       // Get result
       R.at(0).at(0).to(postid);
@@ -80,16 +89,13 @@ Blog blog_database::get_blog(int postid) {
     };
 
     try {
-        // Create SQL Statement
-        std::string sql = "SELECT * from posts WHERE postid=" + std::to_string(postid); // TODO (ROY): Prepared Statements to Prevent SQL Injection
-
         std::lock_guard<std::mutex> guard(this->mtx_);
 
         // Create a non-transactional object
         pqxx::nontransaction N(*(this->conn_));
 
         // Execute SQL Query
-        pqxx::result R( N.exec( sql ));
+        pqxx::result R = N.prepared("get_blog")(std::to_string(postid)).exec();
 
         // Get results
         blog = {
@@ -111,16 +117,13 @@ std::vector<Blog> blog_database::get_all_blogs() {
     std::vector<Blog> res;
 
     try {
-        // Create SQL Statement
-        std::string sql = "SELECT * from posts"; // TODO (ROY): Prepared Statements to Prevent SQL Injection
-
         std::lock_guard<std::mutex> guard(this->mtx_);
 
         // Create a non-transactional object
         pqxx::nontransaction N(*(this->conn_));
 
         // Execute SQL Query
-        pqxx::result R( N.exec( sql ));
+        pqxx::result R = N.prepared("get_all_blogs").exec();
 
         // Get results
         for (pqxx::result::const_iterator c = R.begin(); c != R.end(); ++c) {
