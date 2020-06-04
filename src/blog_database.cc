@@ -48,6 +48,8 @@ int blog_database::add_blog(std::string title, std::string body){
       std::string sql = "INSERT INTO posts (postid, title, body) "  \
         "VALUES (DEFAULT, '" + title + "', '" + body + "') RETURNING postid;"; // TODO (ROY): Prepared Statements to Prevent SQL Injection
 
+      std::lock_guard<std::mutex> guard(this->mtx_);
+
       // Create a transactional object
       pqxx::work W(*(this->conn_));
 
@@ -66,7 +68,7 @@ int blog_database::add_blog(std::string title, std::string body){
       std::cerr << e.what() << std::endl;
       return -1;
    }
-}
+} // auto unlock (lock_guard, RAII)
 
 Blog blog_database::get_blog(int postid) {
     Blog blog = { // Sentinel, check for -1 as the postid
@@ -80,6 +82,8 @@ Blog blog_database::get_blog(int postid) {
 
         // Create SQL Statement
         sql = "SELECT * from posts WHERE postid=" + std::to_string(postid); // TODO (ROY): Prepared Statements to Prevent SQL Injection
+
+        std::lock_guard<std::mutex> guard(this->mtx_);
 
         // Create a non-transactional object
         pqxx::nontransaction N(*(this->conn_));
@@ -100,7 +104,7 @@ Blog blog_database::get_blog(int postid) {
         std::cerr << e.what() << std::endl;
     }
     return blog;
-}
+} // auto unlock (lock_guard, RAII)
 
 std::vector<Blog> blog_database::get_all_blogs() {
     std::vector<Blog> res;
@@ -108,6 +112,8 @@ std::vector<Blog> blog_database::get_all_blogs() {
     try {
         // Create SQL Statement
         std::string sql = "SELECT * from posts"; // TODO (ROY): Prepared Statements to Prevent SQL Injection
+
+        std::lock_guard<std::mutex> guard(this->mtx_);
 
         // Create a non-transactional object
         pqxx::nontransaction N(*(this->conn_));
@@ -130,4 +136,4 @@ std::vector<Blog> blog_database::get_all_blogs() {
     }
 
     return res;
-}
+} // auto unlock (lock_guard, RAII)

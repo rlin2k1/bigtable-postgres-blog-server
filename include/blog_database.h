@@ -29,6 +29,6 @@ class blog_database {
     std::vector<Blog> get_all_blogs(); // List of all blog posts
 
  private:
-    // TODO (ROY): Add Mutex Locks to prevent race conditions on critical sections
+    mutable std::mutex mtx_;
     pqxx::connection* conn_;
 };
