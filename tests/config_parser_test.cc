@@ -218,22 +218,75 @@ TEST_F(NginxConfigParserTest, BlogHandlerConfig) {
   bool success = parser.Parse("blog_config", &out_config);
 
   EXPECT_TRUE(success);
+  EXPECT_EQ(out_config.upload_form_locations_.size(), 1);
+  EXPECT_EQ(out_config.blog_ips_.size(), 2);
+  EXPECT_EQ(out_config.blog_ports_.size(), 2);
+  EXPECT_EQ(out_config.blog_usernames_.size(), 2);
+  EXPECT_EQ(out_config.blog_passwords_.size(), 2);
+
   std::string upload_form_handler = "UploadFormHandler";
   std::string blog_handler = "BlogHandler";
   std::string upload_form_path = "/uploadform";
   std::string blog_path = "/blog";
-  std::string test_ip = "34.83.52.12";
-  std::string found_ip = out_config.blog_locations_[blog_path];
-  bool found_upload_form_path = out_config.upload_form_locations_.find(upload_form_path) != out_config.upload_form_locations_.end();
-  bool found_blog_path = out_config.blog_locations_.find(blog_path) != out_config.blog_locations_.end();
+  std::string blog_path2 = "/blog2";
+
+  // upload form
   bool found_upload_form_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), upload_form_handler) != out_config.handler_types_.end();
+  bool found_upload_form_path = out_config.upload_form_locations_.find(upload_form_path) != out_config.upload_form_locations_.end();
+
+  // first blog block
+  bool found_blog_path_ip = out_config.blog_ips_.find(blog_path) != out_config.blog_ips_.end();
+  bool found_blog_path_port = out_config.blog_ports_.find(blog_path) != out_config.blog_ports_.end();
+  bool found_blog_path_username = out_config.blog_usernames_.find(blog_path) != out_config.blog_usernames_.end();
+  bool found_blog_path_password = out_config.blog_passwords_.find(blog_path) != out_config.blog_passwords_.end();
   bool found_blog_handler = std::find(out_config.handler_types_.begin(), out_config.handler_types_.end(), blog_handler) != out_config.handler_types_.end();
 
-  EXPECT_EQ(out_config.upload_form_locations_.size(), 1);
-  EXPECT_EQ(out_config.blog_locations_.size(), 1);
-  EXPECT_EQ(test_ip, found_ip);
+  // second blog block
+  bool found_blog_path_ip2 = out_config.blog_ips_.find(blog_path2) != out_config.blog_ips_.end();
+  bool found_blog_path_port2 = out_config.blog_ips_.find(blog_path2) != out_config.blog_ips_.end();
+  bool found_blog_path_username2 = out_config.blog_ips_.find(blog_path2) != out_config.blog_ips_.end();
+  bool found_blog_path_password2 = out_config.blog_ips_.find(blog_path2) != out_config.blog_ips_.end();
+
+  // check that the key value pairs exist before checking the values
   EXPECT_TRUE(found_upload_form_path);
-  EXPECT_TRUE(found_blog_path);
+  EXPECT_TRUE(found_blog_path_ip);
+  EXPECT_TRUE(found_blog_path_port);
+  EXPECT_TRUE(found_blog_path_username);
+  EXPECT_TRUE(found_blog_path_password);
   EXPECT_TRUE(found_upload_form_handler);
   EXPECT_TRUE(found_blog_handler);
+  EXPECT_TRUE(found_blog_path_ip2);
+  EXPECT_TRUE(found_blog_path_port2);
+  EXPECT_TRUE(found_blog_path_username2);
+  EXPECT_TRUE(found_blog_path_password2);
+
+  // first block
+  std::string test_ip = "34.83.52.12";
+  std::string found_ip = out_config.blog_ips_[blog_path];
+  std::string test_port = "5432";
+  std::string found_port = out_config.blog_ports_[blog_path];
+  std::string test_username = "testusername";
+  std::string found_username = out_config.blog_usernames_[blog_path];
+  std::string test_password = "testpassword";
+  std::string found_password = out_config.blog_passwords_[blog_path];
+
+  // second block
+  std::string test_ip2 = "127.0.0.1";
+  std::string found_ip2 = out_config.blog_ips_[blog_path2];
+  std::string test_port2 = "2345";
+  std::string found_port2 = out_config.blog_ports_[blog_path2];
+  std::string test_username2 = "hello";
+  std::string found_username2 = out_config.blog_usernames_[blog_path2];
+  std::string test_password2 = "world";
+  std::string found_password2 = out_config.blog_passwords_[blog_path2];
+
+  // check the key value pairs
+  EXPECT_EQ(test_ip, found_ip);
+  EXPECT_EQ(test_port, found_port);
+  EXPECT_EQ(test_username, found_username);
+  EXPECT_EQ(test_password, found_password);
+  EXPECT_EQ(test_ip2, found_ip2);
+  EXPECT_EQ(test_port2, found_port2);
+  EXPECT_EQ(test_username2, found_username2);
+  EXPECT_EQ(test_password2, found_password2);
 }

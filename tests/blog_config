@@ -1,6 +1,16 @@
-location "/uploadform" UploadFormHandler {
-}
-
 location "/blog" BlogHandler {
     host "34.83.52.12";
+    port "5432";
+    username "testusername";
+    password "testpassword";
+}
+
+location "/blog2" BlogHandler {
+    username "hello";
+    password "world";
+    host "127.0.0.1";
+    port "2345";
+}
+
+location "/uploadform" UploadFormHandler {
 }

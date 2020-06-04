@@ -39,6 +39,7 @@ Date Created:
 #include "config_parser.h"
 
 #define MAX_PORT 65535
+#define BLOG_INFO_FIELDS 4
 
 const char* NginxConfigParser::TokenTypeAsString(TokenType type) {
   switch (type) {
@@ -197,8 +198,12 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   bool save_proxy_port_val = false;
   bool expect_redirect_host = false;
   bool save_redirect_host_val = false;
-  bool expect_blog_host = false;
-  bool save_blog_host_val = false;
+
+  bool expect_blog_info = false;
+  bool save_blog_ip_val = false;
+  bool save_blog_port = false;
+  bool save_blog_username = false;
+  bool save_blog_password = false;
 
   std::string port_token = "port";
   std::string location_token = "location";
@@ -212,11 +217,16 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   std::string health_token = "HealthHandler";
   std::string upload_form_token = "UploadFormHandler";
   std::string blog_token = "BlogHandler";
+  std::string username_token = "username";
+  std::string password_token = "password";
 
   std::string location;
   std::string store_proxy_location_token;
   std::string store_redirect_location_token;
-  std::string store_blog_host_location_token;
+  std::string store_blog_ip_location_token;
+  std::string store_blog_port_token;
+  std::string store_blog_username_token;
+  std::string store_blog_password_token;
   std::unordered_set<std::string> seen_handlers;
 
   BOOST_LOG_TRIVIAL(info) << "Parsing configuration file...";
@@ -224,7 +234,6 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   while (true) {
     std::string token;
     token_type = ParseToken(config_file, &token);
-
     if (save_port_val) {
       SetConfigPortNumberFromToken(token, config);
       BOOST_LOG_TRIVIAL(info) << "Port number: " << token;
@@ -232,7 +241,6 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
     }
     if (save_proxy_port_val) {
       if (IsValidPortNum(token)) {
-        location = location.substr(1, location.size()-2);
         BOOST_LOG_TRIVIAL(info) << "Proxy servlet client location: " << location;
         BOOST_LOG_TRIVIAL(info) << "Proxy servlet server location: " << store_proxy_location_token;
         BOOST_LOG_TRIVIAL(info) << "Proxy servlet server port number: " << token;
@@ -247,7 +255,6 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
     }
     if (save_root_val) {
       // remove the quotes
-      location = location.substr(1, location.size()-2);
       token = token.substr(1, token.size()-2);
       BOOST_LOG_TRIVIAL(info) << "Static servlet client location: " << location;
       BOOST_LOG_TRIVIAL(info) << "Static servlet server location: " << token;
@@ -267,7 +274,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       seen_location = false;
     }
     if (save_redirect_host_val) {
-      location = location.substr(1, location.size() - 2);
+      // remove the quotes
       store_redirect_location_token = token.substr(1, token.size() - 2);
       BOOST_LOG_TRIVIAL(info) << "Proxy servlet client location: " << location;
       BOOST_LOG_TRIVIAL(info) << "Proxy servlet server location: " << store_proxy_location_token;
@@ -279,17 +286,37 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       save_redirect_host_val = false;
       seen_location = false;
     }
-    if (save_blog_host_val) {
-      location = location.substr(1, location.size() - 2);
-      store_blog_host_location_token = token.substr(1, token.size() - 2);
+    if (save_blog_ip_val) {
+      // remove the quotes
+      store_blog_ip_location_token = token.substr(1, token.size() - 2);
       BOOST_LOG_TRIVIAL(info) << "Blog servlet client location: " << location;
-      BOOST_LOG_TRIVIAL(info) << "Blog database IP location: " << store_blog_host_location_token;
-      config->blog_locations_[location] = store_blog_host_location_token;
-
-      expect_handler_type = false;
-      expect_blog_host = false;
-      save_blog_host_val = false;
-      seen_location = false;
+      BOOST_LOG_TRIVIAL(info) << "Blog database IP location: " << store_blog_ip_location_token;
+      config->blog_ips_[location] = store_blog_ip_location_token;
+      save_blog_ip_val = false;
+    }
+    if (save_blog_port) {
+      // remove the quotes
+      store_blog_port_token = token.substr(1, token.size() - 2);
+      BOOST_LOG_TRIVIAL(info) << "Blog servlet client location: " << location;
+      BOOST_LOG_TRIVIAL(info) << "Blog database port: " << store_blog_port_token;
+      config->blog_ports_[location] = store_blog_port_token;
+      save_blog_port = false;
+    }
+    if (save_blog_username) {
+      // remove the quotes
+      store_blog_username_token = token.substr(1, token.size() - 2);
+      BOOST_LOG_TRIVIAL(info) << "Blog servlet client location: " << location;
+      BOOST_LOG_TRIVIAL(info) << "Blog database username: " << store_blog_username_token;
+      config->blog_usernames_[location] = store_blog_username_token;
+      save_blog_username = false;
+    }
+    if (save_blog_password) {
+      // remove the quotes
+      store_blog_password_token = token.substr(1, token.size() - 2);
+      BOOST_LOG_TRIVIAL(info) << "Blog servlet client location: " << location;
+      BOOST_LOG_TRIVIAL(info) << "Blog database password: " << store_blog_password_token;
+      config->blog_passwords_[location] = store_blog_password_token;
+      save_blog_password = false;
     }
     if (expect_handler_type) {
       if (seen_handlers.find(token) == seen_handlers.end()) {
@@ -303,34 +330,26 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       } else if (token == proxy_token) {
         expect_proxy_host = true;
       } else if (token == blog_token) {
-        expect_blog_host = true;
+        expect_blog_info = true;
       } else if (token == echo_token) {
-        // remove the quotes
-        location = location.substr(1, location.size()-2);
         BOOST_LOG_TRIVIAL(info) << "Echo location: " << location;
         config->echo_locations_.insert(location);
         location = "";
         seen_location = false;
         expect_handler_type = false;
       } else if (token == status_token) {
-        // remove the quotes
-        location = location.substr(1, location.size()-2);
         BOOST_LOG_TRIVIAL(info) << "Status location: " << location;
         config->status_locations_.insert(location);
         location = "";
         seen_location = false;
         expect_handler_type = false;
       } else if (token == health_token) {
-        // remove the quotes
-        location = location.substr(1, location.size()-2);
         BOOST_LOG_TRIVIAL(info) << "Health location: " << location;
         config->health_locations_.insert(location);
         location = "";
         seen_location = false;
         expect_handler_type = false;
       } else if (token == upload_form_token) {
-        // remove the quotes
-        location = location.substr(1, location.size()-2);
         BOOST_LOG_TRIVIAL(info) << "Upload form location: " << location;
         config->upload_form_locations_.insert(location);
         location = "";
@@ -339,12 +358,12 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       }
     }
     if (seen_location) {
-      location = token;
+      location = token.substr(1, token.size()-2);
       expect_handler_type = true;
       seen_location = false;
     }
 
-    if (token == port_token && !expect_proxy_port) {
+    if (token == port_token && !expect_proxy_port && !expect_blog_info) {
       save_port_val = true;
     } else if (token == location_token) {
       seen_location = true;
@@ -356,8 +375,14 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       save_proxy_port_val = true;
     } else if (expect_redirect_host && token == host_token) {
       save_redirect_host_val = true;
-    } else if (expect_blog_host && token == host_token) {
-      save_blog_host_val = true;
+    } else if (expect_blog_info && token == host_token) {
+      save_blog_ip_val = true;
+    } else if (expect_blog_info && token == port_token) {
+      save_blog_port = true;
+    } else if (expect_blog_info && token == password_token) {
+      save_blog_password = true;
+    } else if (expect_blog_info && token == username_token) {
+      save_blog_username = true;
     }
 
     if (token_type == TOKEN_TYPE_ERROR) {
@@ -413,6 +438,23 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
         // Error.
         break;
       }
+      // set our entire state to false, starting a new block
+      expect_blog_info = false;
+      save_blog_ip_val = false;
+      save_blog_port = false;
+      save_blog_username = false;
+      save_blog_password = false;
+      save_port_val = false;
+      seen_location = false;
+      save_root_val = false;
+      expect_handler_type = false;
+      expect_static_root = false;
+      expect_proxy_host = false;
+      save_proxy_host_val =  false;
+      expect_proxy_port = false;
+      save_proxy_port_val = false;
+      expect_redirect_host = false;
+      save_redirect_host_val = false;
       bracket_stack.pop();
       config_stack.pop();
     } else if (token_type == TOKEN_TYPE_EOF) {
