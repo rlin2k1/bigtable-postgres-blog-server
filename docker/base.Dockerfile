@@ -18,4 +18,6 @@ RUN apt-get update && apt-get install -y \
     libboost-regex-dev \
     libxml2-dev \
     libxml2 \
-    libpqxx-dev
+    libpqxx-dev \
+    libkeyutils1 \
+    libssl1.1

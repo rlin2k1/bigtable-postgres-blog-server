@@ -27,6 +27,14 @@ COPY files/ files/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libxml2* /usr/lib/x86_64/
 # Copy dynamic library for ICU library
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libicu* /usr/lib/x86_64/
+# Copy dynamic library for libkeyutils
+COPY --from=builder /lib/x86_64-linux-gnu/libkeyutils* /usr/lib/x86_64/
+# Copy dynamic library for pq and pqxx library
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libpq* /usr/lib/x86_64/
+# Copy dynamic library for pq and pqxx library
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libssl* /usr/lib/x86_64/
+# Copy dynamic library for crypto library
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcrypto* /usr/lib/x86_64/
 
 # Expose some port(s)
 EXPOSE 80
