@@ -56,10 +56,8 @@ int blog_database::add_blog(std::string title, std::string body){
       // Execute SQL Query
       pqxx::result R( W.exec( sql ));
 
-      // Get results
-      for (pqxx::result::const_iterator c = R.begin(); c != R.end(); ++c) { // TODO (ROY): Get rid of For Logic
-        postid = c[0].as<int>();
-      }
+      // Get result
+      R.at(0).at(0).to(postid);
 
       W.commit();
       std::cout << "Records created successfully" << std::endl; //TODO (ROY): LOGGING
@@ -91,14 +89,13 @@ Blog blog_database::get_blog(int postid) {
         // Execute SQL Query
         pqxx::result R( N.exec( sql ));
 
-        // Get results
-        for (pqxx::result::const_iterator c = R.begin(); c != R.end(); ++c) { // TODO (ROY): Get rid of For Logic
-            blog = {
-                c[0].as<int>(), // postid
-                c[1].as<std::string>(), // title
-                c[2].as<std::string>() //body
-            };
-        }
+        // Get result
+        blog = {
+            R.at(0).at(0).as<int>(), // postid
+            R.at(0).at(1).as<std::string>(), // title
+            R.at(0).at(2).as<std::string>() //body
+        };
+
         std::cout << "Operation done successfully" << std::endl; //TODO (ROY): LOGGING
     } catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;
