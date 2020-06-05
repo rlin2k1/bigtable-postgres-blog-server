@@ -13,7 +13,6 @@ Date Created:
 */
 #include <sstream>
 #include <boost/log/trivial.hpp>
-
 #include "blog_database.h"
 
 blog_database::blog_database(std::string dbname, std::string user, std::string password, std::string hostaddr, std::string port){
@@ -46,7 +45,7 @@ blog_database::blog_database(std::string dbname, std::string user, std::string p
         "get_all_blogs",
         "SELECT * from posts");
     } catch (const std::exception &e) {
-        BOOST_LOG_TRIVIAL(info) << e.what();
+        BOOST_LOG_TRIVIAL(error) << e.what();
     }
 }
 
@@ -76,7 +75,7 @@ int blog_database::insert_blog(std::string title, std::string body){
       << std::to_string(postid);
       return postid;
    } catch (const std::exception &e) {
-      BOOST_LOG_TRIVIAL(info) << e.what();
+      BOOST_LOG_TRIVIAL(error) << e.what();
       return -1;
    }
 } // auto unlock (lock_guard, RAII)
@@ -108,7 +107,7 @@ Blog blog_database::get_blog(int postid) {
         << "Finished attempt to obtain blog post with postid: " \
         << std::to_string(postid);
     } catch (const std::exception &e) {
-        BOOST_LOG_TRIVIAL(info) << e.what();
+        BOOST_LOG_TRIVIAL(error) << e.what();
     }
     return blog;
 } // auto unlock (lock_guard, RAII)
@@ -136,7 +135,7 @@ std::vector<Blog> blog_database::get_all_blogs() {
         }
         BOOST_LOG_TRIVIAL(info) << "Finish attempt to obtain all blog posts";
     } catch (const std::exception &e) {
-        BOOST_LOG_TRIVIAL(info) << e.what();
+        BOOST_LOG_TRIVIAL(error) << e.what();
     }
 
     return res;

@@ -27,6 +27,7 @@ Date Created:
 #include "redirect_request_handler.h"
 #include "health_request_handler.h"
 #include "upload_form_request_handler.h"
+#include "blog_upload_request_handler.h"
 
 /* request_dispatcher Constructor
 Parameter(s):
@@ -100,6 +101,12 @@ void request_dispatcher::create_handler_mapping() {
               request_handler* form_handler = upload_form_request_handler::Init(*itr, config_);
               dispatcher[*itr] = form_handler;  // Set health uri path mapping to upload form handler
           }
+        } else if (*i == "BlogHandler") {
+          std::unordered_map<std::string, std::string> blog_upload_locations = config_.blog_ips_;
+          for (std::unordered_map<std::string, std::string>::iterator itr = blog_upload_locations.begin(); itr != blog_upload_locations.end(); ++itr) {
+              request_handler* blog_upload_handler = blog_upload_request_handler::Init(itr->first, config_);
+              dispatcher[itr->first] = blog_upload_handler;  // Set file upload uri path mapping to health handler
+          }
         }
         // ******************************** TEMPLATE FOR NEW HANDLER REGISTRATIONS *******************************
         // else if (*i == "NEWHandler") {  // TODO (newteam): Add a new handler. Your handler may not need an unordered_map to track locations
@@ -164,6 +171,20 @@ request_handler* request_dispatcher::get_handler(std::string uri) {
 
     if (found) {
         return dispatcher[uri_prefix];
+    }
+
+    std::string uri_prefix_2;
+    bool found_2 = false;
+    for (const auto& pair : config_.blog_ips_) {
+        uri_prefix_2 = uri.substr(0, pair.first.length());
+        if (uri_prefix_2 == pair.first) {
+            found_2 = true;
+            break;
+        }
+    }
+
+    if (found_2) {
+        return dispatcher[uri_prefix_2];
     }
 
     return error_handler_;

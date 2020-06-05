@@ -198,7 +198,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   bool save_proxy_port_val = false;
   bool expect_redirect_host = false;
   bool save_redirect_host_val = false;
-
+  // Blog information
   bool expect_blog_info = false;
   bool save_blog_ip_val = false;
   bool save_blog_port = false;
@@ -219,7 +219,6 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   std::string blog_token = "BlogHandler";
   std::string username_token = "username";
   std::string password_token = "password";
-
   std::string location;
   std::string store_proxy_location_token;
   std::string store_redirect_location_token;
@@ -227,6 +226,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   std::string store_blog_port_token;
   std::string store_blog_username_token;
   std::string store_blog_password_token;
+  std::string store_blog_upload_token;
   std::unordered_set<std::string> seen_handlers;
 
   BOOST_LOG_TRIVIAL(info) << "Parsing configuration file...";
@@ -279,7 +279,6 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       BOOST_LOG_TRIVIAL(info) << "Proxy servlet client location: " << location;
       BOOST_LOG_TRIVIAL(info) << "Proxy servlet server location: " << store_proxy_location_token;
       config->redirect_locations_[location] = store_redirect_location_token;
-
       expect_redirect_host = false;
       expect_handler_type = false;
       expect_proxy_port = false;

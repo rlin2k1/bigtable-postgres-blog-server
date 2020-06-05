@@ -37,12 +37,6 @@ Date Created:
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/thread/thread.hpp>
 
-// TODO: After Database is implemented into the request handler, please remove
-#include "blog.h"
-#include "blog_database.h"
-#include <pqxx/pqxx>
-//------------------------------------------------------------------------------
-
 const int THREAD_POOL_SIZE = 4;
 
 using boost::asio::ip::tcp;
@@ -126,36 +120,9 @@ int main(int argc, char* argv[]) {
     BOOST_LOG_TRIVIAL(info) << "Successfully started web server \
 using port number "<< config.port_number;
 
-    // TODO: After Database is implemented into the request handler, please remove
-    // -------------------------------------------------------------------------- //
-    // Mock Database API Example
-    // -------------------------------------------------------------------------- //
-    /*
-    // Commenting out for now because everytime we do a gcloud build, this gets run and inputs extra entries into the db
-    blog_database bd("postgres", "ucla", "ucla", "34.83.52.12", "5432");
-    std::cout << "INSERTING BLOG POST with Title: TitlePost and Body: BodyPost and Generated PostID:" << std::endl;
-    std::cout << bd.insert_blog("TitlePost", "BodyPost") << std::endl;
-    std::cout << "GETTING ALL BLOG POSTS IN DATABASE------------------------------------" << std::endl;
-    std::vector<Blog> blogs = bd.get_all_blogs();
-    for (auto vectorit = blogs.begin(); vectorit != blogs.end(); ++vectorit) {
-        std::cout << "PostID = " << std::to_string((*vectorit).postid) << std::endl;
-        std::cout << "Title = " << (*vectorit).title << std::endl;
-        std::cout << "Body = " << (*vectorit).body << std::endl;
-    }
-
-    std::cout << "GETTING BLOG POST WITH POSTID 3------------------------------------" << std::endl;
-    Blog blog = bd.get_blog(3);
-    std::cout << "PostID = " << std::to_string(blog.postid) << std::endl;
-    std::cout << "Title = " << blog.title << std::endl;
-    std::cout << "Body = " << blog.body << std::endl;
-    */
-    // End of Mock Database API Example
-    //----------------------------------------------------------------------------------------------
-
     // Create a pool of threads to run all of the io_services.
     std::vector<boost::shared_ptr<boost::thread> > threads;
-    for (std::size_t i = 0; i < THREAD_POOL_SIZE; ++i)
-    {
+    for (std::size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       boost::shared_ptr<boost::thread> thread(new boost::thread(
             boost::bind(&boost::asio::io_service::run, &io_service)));
       threads.push_back(thread);

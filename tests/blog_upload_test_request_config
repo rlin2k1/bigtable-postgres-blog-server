@@ -1,0 +1,6 @@
+location "/blog" BlogHandler {
+  username "ucla";
+  password "ucla";
+  host "34.83.52.12";
+  port "5432";
+}

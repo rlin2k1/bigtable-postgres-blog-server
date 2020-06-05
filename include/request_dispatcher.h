@@ -22,6 +22,7 @@ Date Created:
 #include "proxy_request_handler.h"
 #include "health_request_handler.h"
 #include "upload_form_request_handler.h"
+#include "blog_upload_request_handler.h"
 
 class request_dispatcher {
     public:
