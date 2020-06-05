@@ -32,3 +32,6 @@ location "/health" HealthHandler {
 
 location "/health2" HealthHandler {
 }
+
+location "/uploadform" UploadFormHandler {
+}

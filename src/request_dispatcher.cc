@@ -26,6 +26,7 @@ Date Created:
 #include "proxy_request_handler.h"
 #include "redirect_request_handler.h"
 #include "health_request_handler.h"
+#include "upload_form_request_handler.h"
 
 /* request_dispatcher Constructor
 Parameter(s):
@@ -86,13 +87,18 @@ void request_dispatcher::create_handler_mapping() {
             request_handler* redirect_handler = redirect_request_handler::Init(itr->first, config_);
 
             dispatcher[itr->first] = redirect_handler;  // Set redirect uri path mapping to redirect handler
-          } 
+          }
         } else if (*i == "HealthHandler") {
           std::unordered_set<std::string> health_locations = config_.health_locations_;
 
           for (std::unordered_set<std::string>::iterator itr = health_locations.begin(); itr != health_locations.end(); ++itr) {
               request_handler* health_handler = health_request_handler::Init(*itr, config_);
               dispatcher[*itr] = health_handler;  // Set health uri path mapping to health handler
+          }
+        } else if (*i == "UploadFormHandler") {
+          for (std::unordered_set<std::string>::const_iterator itr = config_.upload_form_locations_.begin(); itr != config_.upload_form_locations_.end(); ++itr) {
+              request_handler* form_handler = upload_form_request_handler::Init(*itr, config_);
+              dispatcher[*itr] = form_handler;  // Set health uri path mapping to upload form handler
           }
         }
         // ******************************** TEMPLATE FOR NEW HANDLER REGISTRATIONS *******************************
@@ -141,6 +147,8 @@ request_handler* request_dispatcher::get_handler(std::string uri) {
     } else if (config_.redirect_locations_.find(uri) != config_.redirect_locations_.end()) {
         return dispatcher[uri];
     } else if (config_.health_locations_.find(uri) != config_.health_locations_.end()) {
+        return dispatcher[uri];
+    } else if (config_.upload_form_locations_.find(uri) != config_.upload_form_locations_.end()) {
         return dispatcher[uri];
     }
 

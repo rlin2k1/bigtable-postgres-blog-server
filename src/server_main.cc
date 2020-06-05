@@ -130,6 +130,8 @@ using port number "<< config.port_number;
     // -------------------------------------------------------------------------- //
     // Mock Database API Example
     // -------------------------------------------------------------------------- //
+    /*
+    // Commenting out for now because everytime we do a gcloud build, this gets run and inputs extra entries into the db
     blog_database bd("postgres", "ucla", "ucla", "34.83.52.12", "5432");
     std::cout << "INSERTING BLOG POST with Title: TitlePost and Body: BodyPost and Generated PostID:" << std::endl;
     std::cout << bd.add_blog("TitlePost", "BodyPost") << std::endl;
@@ -146,7 +148,7 @@ using port number "<< config.port_number;
     std::cout << "PostID = " << std::to_string(blog.postid) << std::endl;
     std::cout << "Title = " << blog.title << std::endl;
     std::cout << "Body = " << blog.body << std::endl;
-
+    */
     // End of Mock Database API Example
     //----------------------------------------------------------------------------------------------
 

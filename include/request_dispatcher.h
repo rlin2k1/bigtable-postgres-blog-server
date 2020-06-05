@@ -21,6 +21,7 @@ Date Created:
 #include "status_request_handler.h"
 #include "proxy_request_handler.h"
 #include "health_request_handler.h"
+#include "upload_form_request_handler.h"
 
 class request_dispatcher {
     public:
@@ -28,7 +29,7 @@ class request_dispatcher {
         void create_handler_mapping();
         request_handler* get_handler(std::string uri);
         status_request_handler* get_status_handler();
-        bool status_handler_enabled = false; 
+        bool status_handler_enabled = false;
 
     private:
         const NginxConfig& config_;

@@ -45,7 +45,7 @@ include_directories(include)
 include_directories(${LIBXML2_INCLUDE_DIRS})
 
 # Update name and srcs - ** we'll need to update these after refactoring
-add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParser.cc src/request_parser.cc src/response_helper_library.cc src/static_request_handler.cc  src/echo_request_handler.cc src/request_dispatcher.cc src/error_404_request_handler.cc src/status_request_handler.cc src/proxy_request_handler.cc src/redirect_request_handler.cc src/response_parser.cc src/health_request_handler.cc src/blog_database.cc)
+add_library(session_server_lib src/session.cc src/server.cc src/NginxConfigParser.cc src/request_parser.cc src/response_helper_library.cc src/static_request_handler.cc  src/echo_request_handler.cc src/request_dispatcher.cc src/error_404_request_handler.cc src/status_request_handler.cc src/proxy_request_handler.cc src/redirect_request_handler.cc src/response_parser.cc src/health_request_handler.cc src/blog_database.cc src/upload_form_request_handler.cc)
 
 # Update executable name, srcs, and deps
 add_executable(webserver src/server_main.cc)
