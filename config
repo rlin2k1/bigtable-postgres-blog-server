@@ -39,6 +39,6 @@ location "/uploadform" UploadFormHandler {
 location "/blog" BlogHandler {
   username "ucla";
   password "ucla";
-  host "34.83.52.12";
+  host "35.233.247.136";
   port "5432";
 }
