@@ -16,7 +16,6 @@ Date Created:
 
 #include <string>
 #include <vector>
-#include <mutex>
 #include <pqxx/pqxx>
 
 #include "database.h"
