@@ -76,6 +76,9 @@ target_link_libraries(request_handler_health_test session_server_lib gtest_main 
 add_executable(request_handler_blog_upload_test tests/request_handler_blog_upload_test.cc)
 target_link_libraries(request_handler_blog_upload_test session_server_lib mock_database_lib gtest_main Boost::system Boost::log_setup Boost::log Boost::iostreams ZLIB::ZLIB ${LIBXML2_LIBRARY} ${PQXX_LIB} ${PQ_LIB})
 
+add_executable(mock_database_test tests/mock_database_test.cc)
+target_link_libraries(mock_database_test mock_database_lib gtest_main Boost::log)
+
 # Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(request_parser_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -84,10 +87,11 @@ gtest_discover_tests(response_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 gtest_discover_tests(response_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(request_handler_health_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(request_handler_blog_upload_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(mock_database_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 add_test(NAME integration_test COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration_test.sh)
 add_test(NAME multithreading_test COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/tests/multithreading_test.py)
 
 # Update with target/test targets
 include(cmake/CodeCoverageReportConfig.cmake)
 
-generate_coverage_report(TARGETS webserver session_server_lib TESTS config_parser_test request_parser_handler_test request_handler_proxy_test response_test response_parser_test request_handler_health_test request_handler_blog_upload_test)
+generate_coverage_report(TARGETS webserver session_server_lib TESTS config_parser_test request_parser_handler_test request_handler_proxy_test response_test response_parser_test request_handler_health_test request_handler_blog_upload_test mock_database_test)

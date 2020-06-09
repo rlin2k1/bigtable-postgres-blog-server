@@ -22,4 +22,10 @@ struct Blog {
     std::string body;
 };
 
+inline bool operator==(const Blog& lhs, const Blog& rhs) {
+    return (lhs.postid == rhs.postid) \
+    && (lhs.title == rhs.title) \
+    && (lhs.body == rhs.body);
+}
+
 #endif // BLOG_STRUCT
