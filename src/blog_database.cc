@@ -78,7 +78,7 @@ int blog_database::insert_blog(std::string title, std::string body){
       BOOST_LOG_TRIVIAL(error) << e.what();
       return -1;
    }
-} // auto unlock (lock_guard, RAII)
+}  // auto unlock (lock_guard, RAII)
 
 Blog blog_database::get_blog(int postid) {
     Blog blog = { // Sentinel, check for -1 as the postid
@@ -139,4 +139,4 @@ std::vector<Blog> blog_database::get_all_blogs() {
     }
 
     return res;
-} // auto unlock (lock_guard, RAII)
+}  // auto unlock (lock_guard, RAII)

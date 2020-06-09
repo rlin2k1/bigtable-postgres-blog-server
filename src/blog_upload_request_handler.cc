@@ -29,6 +29,15 @@ blog_upload_request_handler* blog_upload_request_handler::Init(const std::string
   return burh;
 }
 
+// Constructor 
+blog_upload_request_handler::blog_upload_request_handler() {}
+
+// Constructor 
+blog_upload_request_handler::blog_upload_request_handler(const std::string& location_path, database* db) {
+  bd = db;
+  location_prefix_ = location_path;
+}
+
 blog_upload_request_handler::~blog_upload_request_handler() {
   delete bd;
   bd = NULL;
@@ -55,6 +64,7 @@ Response blog_upload_request_handler::handle_request(const Request& request) {
   }
   return response_;
 }
+
 // Check if all characters are digits
 bool blog_upload_request_handler::is_number(const std::string& enter_string) {
   if (enter_string.empty()) {
@@ -65,6 +75,9 @@ bool blog_upload_request_handler::is_number(const std::string& enter_string) {
       return false;
   }
   return true;
+}
+std::string blog_upload_request_handler::getLocationPrefix() {
+  return location_prefix_;
 }
 
 // Handle get request by entering your id
@@ -105,12 +118,17 @@ Response blog_upload_request_handler::handle_get(int id, std::string host, std::
 // Handle post requests after you submit your form
 Response blog_upload_request_handler::handle_post(std::string title, std::string body, std::string host, std::string port_num) {
   int postid = bd->insert_blog(title, body);
+  
   Response response;
   response.code_ = Response::moved_temporarily;
   response.headers_["Content-Length"] = std::to_string(response.body_.size());
   response.headers_["Content-Type"] = "text/html";
   // Redirected to new location
-  response.headers_["Location"] = "/blog/" + std::to_string(postid);
+  if (location_prefix_[location_prefix_.size() - 1] == '/') {
+    response.headers_["Location"] = location_prefix_ + std::to_string(postid);
+  } else {
+    response.headers_["Location"] = std::string(location_prefix_) + "/" + std::to_string(postid);
+  }
   return response;
 }
 
