@@ -48,8 +48,7 @@ TEST_F(Blog_Upload_Request_Handler_Test, GetBlogUploadFailureTest) {
   html_body_get_response += "Error: Unable to get blog entry from id.";
   html_body_get_response += "</h1>\n";
   html_body_get_response += "<p>\nPlease use a valid id number</p>\n\n";
-  html_body_get_response += "</body>\n\
-  </html>\n";
+  html_body_get_response += "</body>\n</html>\n";
 
   Response test = blog_upload_request_handler_->handle_request(request_);
   std::map<std::string, std::string> response_header = { {"Content-Length", std::to_string(test.body_.size())}, {"Content-Type", "text/html"} };
@@ -81,12 +80,9 @@ TEST_F(Blog_Upload_Request_Handler_Test, POSTBlogUploadSuccessTest) {
     </head>\n\
     <body style=\"text-align:center;\">\n\
       <h1>\n";
-  html_body_get_response += "Blog Entry " + entry_number + "\n\n";
   html_body_get_response += "</h1>\n";
-  html_body_get_response += std::string("<p>\n") + "</p>\n\n";
   html_body_get_response += std::string("<p>\n") + "</p>\n";
-  html_body_get_response += "</body>\n\
-  </html>\n";
+  html_body_get_response += "</body>\n<div style=\"position: fixed;bottom: 0;right: 0;\">POSTID: " + entry_number + "</div></html>\n";
 
   std::map<std::string, std::string> response_header_2 = { {"Content-Length", std::to_string(test_2.body_.size())}, {"Content-Type", "text/html"} };
   EXPECT_EQ(test_2.code_, Response::ok);

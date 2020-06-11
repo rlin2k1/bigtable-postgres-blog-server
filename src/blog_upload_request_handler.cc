@@ -97,15 +97,12 @@ Response blog_upload_request_handler::handle_get(int id, std::string host, std::
     html_body_get_response += "Error: Unable to get blog entry from id.";
     html_body_get_response += "</h1>\n";
     html_body_get_response += "<p>\nPlease use a valid id number</p>\n\n";
+    html_body_get_response += "</body>\n</html>\n";
   } else {
-    html_body_get_response += "Blog Entry " + std::to_string(blog.postid) + "\n\n";
-    html_body_get_response += "</h1>\n";
-    html_body_get_response += "<p>\n" + blog.title + "</p>\n\n";
+    html_body_get_response += blog.title + "</h1>\n";
     html_body_get_response += "<p>\n" + blog.body + "</p>\n";
+    html_body_get_response += "</body>\n<div style=\"position: fixed;bottom: 0;right: 0;\">POSTID: " + std::to_string(blog.postid) + "</div></html>\n";
   }
-
-  html_body_get_response += "</body>\n\
-  </html>\n";
 
   Response response;
   response.code_ = Response::ok;
