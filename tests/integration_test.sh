@@ -55,7 +55,7 @@ printf "port 8080; # The port my server listens on
 
 location \"/echo\" EchoHandler {
 }
-
+c
 location \"/echo2\" EchoHandler {
 }
 
@@ -440,6 +440,7 @@ rm $CONFIG_NAME
 # ---------------------------------------------------------------------------- #
 # Start 2 servers and do proxy tests
 # ---------------------------------------------------------------------------- #
+sleep $SLEEPTIME # Wait for Server to Shutdown
 $SRC_DIR/$BINARY_NAME $TEST_DIR"/proxy_config1" &
 WEBSERVER1_PID=$!
 sleep $SLEEPTIME
