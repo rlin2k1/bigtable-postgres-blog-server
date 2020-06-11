@@ -1,11 +1,13 @@
 /* blog_upload_request_handler.cc
 Description:
   Request handler for request to get the html form to submit blog entries
+
 Author(s):
   Kubilay Agi
   Michael Gee
   Jane Lee
   Roy Lin
+
 Date Created:
   June 4th, 2020
 */
@@ -19,28 +21,28 @@ Date Created:
 
 blog_upload_request_handler* blog_upload_request_handler::Init(const std::string& location_path, const NginxConfig& config) {
   blog_upload_request_handler* burh = new blog_upload_request_handler();
-  const std::string database_type = "postgres";
+  const std::string database_name = "postgres";
   std::string username = config.blog_usernames_.at(location_path);
   std::string password = config.blog_passwords_.at(location_path);
   std::string host = config.blog_ips_.at(location_path);
   std::string port_num = config.blog_ports_.at(location_path);
-  burh->bd = new blog_database(database_type, username, password, host, port_num);
+  burh->bd_ = new blog_database(database_name, username, password, host, port_num);
   burh->location_prefix_ = location_path;
   return burh;
 }
 
-// Constructor 
+// Constructor
 blog_upload_request_handler::blog_upload_request_handler() {}
 
-// Constructor 
+// Constructor
 blog_upload_request_handler::blog_upload_request_handler(const std::string& location_path, database* db) {
-  bd = db;
+  bd_ = db;
   location_prefix_ = location_path;
 }
 
 blog_upload_request_handler::~blog_upload_request_handler() {
-  delete bd;
-  bd = NULL;
+  delete bd_;
+  bd_ = NULL;
 }
 
 Response blog_upload_request_handler::handle_request(const Request& request) {
@@ -48,19 +50,22 @@ Response blog_upload_request_handler::handle_request(const Request& request) {
   BOOST_LOG_TRIVIAL(info) << "Sending back blog upload form.";
   Response response_;
   std::string decoded_str = urldecode(request.body_);
-  form_to_value = parseRequestBody(decoded_str);
+  form_to_value_ = parseRequestBody(decoded_str);
 
   if (request.method_ == Request::MethodEnum::GET) {
     std::string remain_uri = request.uri_.substr(location_prefix_.size());
+    if ( (location_prefix_ + "/").find(request.uri_) != std::string::npos) {
+      response_ = handle_get_all_blogs();
+    }
     // If user enters unparsable id, return bad id error page to client
-    if (remain_uri.size() <= 1 || !is_number(remain_uri.substr(1))) {
-      response_ = handle_get(-1, server_host, server_port_num);
+    else if (remain_uri.size() <= 1 || !is_number(remain_uri.substr(1))) {
+      response_ = handle_get_one_blog(-1);
     } else {  // Use handle_get to check whether id can be gathered from database
       remain_uri = remain_uri.substr(1);
-      response_ = handle_get(stoi(remain_uri), server_host, server_port_num);
+      response_ = handle_get_one_blog(stoi(remain_uri));
     }
   } else {
-    response_ = handle_post(form_to_value["submissiontitle"], form_to_value["submissionbody"], server_host, server_port_num);
+    response_ = handle_post_blog(form_to_value_["submissiontitle"], form_to_value_["submissionbody"]);
   }
   return response_;
 }
@@ -81,14 +86,14 @@ std::string blog_upload_request_handler::getLocationPrefix() {
 }
 
 // Handle get request by entering your id
-Response blog_upload_request_handler::handle_get(int id, std::string host, std::string port_num) {
-  Blog blog = bd->get_blog(id);
+Response blog_upload_request_handler::handle_get_one_blog(int postid) {
+  Blog blog = bd_->get_blog(postid);
 
   std::string html_body_get_response = "<!DOCTYPE html>\n\
 <html>\n\
     <head>\n\
         <meta charset='utf-8'>\n\
-        <title>Blog Upload Form</title>\n\
+        <title>Blog Post</title>\n\
     </head>\n\
     <body style=\"text-align:center;\">\n\
       <h1>\n";
@@ -112,10 +117,35 @@ Response blog_upload_request_handler::handle_get(int id, std::string host, std::
   return response;
 }
 
+Response blog_upload_request_handler::handle_get_all_blogs() {
+  std::string html_body_get_response = "<!DOCTYPE html>\n\
+<html>\n\
+    <head>\n\
+        <meta charset='utf-8'>\n\
+        <title>All Blogs</title>\n\
+    </head>\n\
+    <body style=\"text-align:center;\">\n";
+  std::vector<Blog> blogs = bd_->get_all_blogs();
+  for (auto vectorit = blogs.begin(); vectorit != blogs.end(); ++vectorit) {
+    html_body_get_response += "<div>*****POSTID: " + std::to_string((*vectorit).postid) +  "*****</div>";
+    html_body_get_response += "<h1>\n" + (*vectorit).title + "</h1>\n";
+    html_body_get_response += "<p>\n" + (*vectorit).body + "</p>\n";
+    html_body_get_response += "<div>-------------------------------------------------------------------------------------</div>";
+  }
+  html_body_get_response += "</body>\n</html>\n";
+
+  Response response;
+  response.code_ = Response::ok;
+  response.body_ = html_body_get_response;
+  response.headers_["Content-Length"] = std::to_string(response.body_.size());
+  response.headers_["Content-Type"] = "text/html";
+  return response;
+}
+
 // Handle post requests after you submit your form
-Response blog_upload_request_handler::handle_post(std::string title, std::string body, std::string host, std::string port_num) {
-  int postid = bd->insert_blog(title, body);
-  
+Response blog_upload_request_handler::handle_post_blog(std::string title, std::string body) {
+  int postid = bd_->insert_blog(title, body);
+
   Response response;
   response.code_ = Response::moved_temporarily;
   response.headers_["Content-Length"] = std::to_string(response.body_.size());

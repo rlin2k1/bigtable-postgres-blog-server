@@ -41,7 +41,7 @@ TEST_F(Blog_Upload_Request_Handler_Test, GetBlogUploadFailureTest) {
 <html>\n\
     <head>\n\
         <meta charset='utf-8'>\n\
-        <title>Blog Upload Form</title>\n\
+        <title>Blog Post</title>\n\
     </head>\n\
     <body style=\"text-align:center;\">\n\
       <h1>\n";
@@ -76,7 +76,7 @@ TEST_F(Blog_Upload_Request_Handler_Test, POSTBlogUploadSuccessTest) {
 <html>\n\
     <head>\n\
         <meta charset='utf-8'>\n\
-        <title>Blog Upload Form</title>\n\
+        <title>Blog Post</title>\n\
     </head>\n\
     <body style=\"text-align:center;\">\n\
       <h1>\n";
